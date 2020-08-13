@@ -1,24 +1,45 @@
-# Project Name
+# Open Stata
 
-![Team Photo](Insert a Team Photo URL here)
-[*how?*](https://help.github.com/articles/about-readmes/#relative-links-and-image-paths-in-readme-files)
+## What is Open Stata?
 
-TODO: short project description, some sample screenshots or mockups
+Open Stata is an in-browser open-source replication of the basic functionality of the statistical software Stata.
 
 ## Architecture
 
-TODO:  descriptions of code organization and tools and libraries used
+**Frontend** 
+    - UI Syling: CSS and Material-UI
+    - Frontend structure: React
+    - Frontend state management: Redux
+    - API calls: Axios
+    - Command parsing - ask Tim?
+    - Authentication/user data: Firebase
+**Backend**
+    - Platform: Flask
+    - Interpretation: (Nearley?)
+    - API: Axios
+    - Python libraries for statistics commands implementation (e.g. econtools, sci-kit learn)
+    - Database: GCP/Firebase -  csv(?) - aks Tim?
 
 ## Setup
 
-TODO: how to get the project dev environment up and running, npm install etc
+To get backend running, [Flask startup]. Hosted on Heroku.
 
 ## Deployment
 
-TODO: how to deploy the project
+Frontend: Surge
+Backend: Heroku
 
 ## Authors
 
-TODO: list of authors
+![Team Photo](Insert a Team Photo URL here)
+
+- [Jared Cole](https://github.com/jcole13)
+- [Jeff Liu](https://github.com/jeffzyliu)
+- [Arjun Srinivasan](https://github.com/arjunsrini)
+- [Jack Keane](https://github.com/jakeane)
+- [Val Werner](https://github.com/valrw)
+- [Chris Sykes](https://github.com/chriscsykes)
 
 ## Acknowledgments
+
+The CS52 TA and Teaching team!
