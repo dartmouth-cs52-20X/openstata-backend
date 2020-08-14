@@ -11,7 +11,6 @@ Open Stata is an in-browser open-source replication of the basic functionality o
 - Frontend structure: React
 - Frontend state management: Redux
 - API calls: Axios
-- Command parsing - ask Tim?
 - Authentication/user data: Firebase
 
 **Backend**
@@ -19,7 +18,7 @@ Open Stata is an in-browser open-source replication of the basic functionality o
 - Interpretation: (Nearley?)
 - API: Axios
 - Python libraries for statistics commands implementation (e.g. econtools, sci-kit learn)
-- Database: GCP/Firebase -  csv(?) - aks Tim?
+- Database: GCP/Firebase
 
 ## Setup
 
