@@ -1,0 +1,64 @@
+using grammar file ../index
+
+file testcases/describe
+actual read input:
+desc a d g
+
+desc
+
+
+number of results: 1
+processed/regenerated input:
+[ 'desc a d g', 'desc' ]
+parsed python output:
+[ "describe(['a','d','g'])", 'describe([])' ]
+
+
+file testcases/regression
+actual read input:
+reg y x
+
+reg y x if income > 100
+
+reg y x1 x2 x3
+
+reg y x2 x3 if x2 < 7 & x3 < 5
+
+number of results: 1
+processed/regenerated input:
+[
+  'reg y x',
+  'reg y x if income > 100',
+  'reg y x1 x2 x3',
+  'reg y x2 x3 if x2 < 7 & x3 < 5'
+]
+parsed python output:
+[
+  "regress('y', ['x'], None)",
+  "regress('y', ['x'], 'income > 100')",
+  "regress('y', ['x1','x2','x3'], None)",
+  "regress('y', ['x2','x3'], 'x2 < 7 & x3 < 5')"
+]
+
+
+file testcases/summarize
+actual read input:
+summ a
+
+summ if hi
+
+summarize
+
+summ a b c if x
+
+number of results: 1
+processed/regenerated input:
+[ 'summ a', 'summ if hi', 'summarize', 'summ a b c if x' ]
+parsed python output:
+[
+  "summarize(['a'], None)",
+  "summarize([], 'hi')",
+  'summarize([], None)',
+  "summarize(['a','b','c'], 'x')"
+]
+

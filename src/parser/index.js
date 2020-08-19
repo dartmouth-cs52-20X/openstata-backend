@@ -1,4 +1,3 @@
-/* eslint-disable */
 // Generated automatically by nearley, version 2.19.5
 // http://github.com/Hardmath123/nearley
 (function () {
@@ -53,7 +52,7 @@ function composeFromRaw(rawinput) {
 // can take an array of some raw text and some that are already parsed
 function composeManyInputs(inputArray) {
 	return inputArray.map((items) => {
-		if (items.input) {
+		if (items.input || items.input === '') {
 			return items.input
 		} else {
 			return items;	
@@ -68,14 +67,25 @@ function composeRegression([yvar, xArray, cond]) {
 	return `regress('${yvar}', ${xvars}, ${condString})`
 }
 
+function composeSummarize([vars, cond]) {
+	const condString = cond ? `\'${cond}\'` : 'None';
+	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	return `summarize(${varString}, ${condString})`;
+}
+
+function composeDescribe([vars]) {
+	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	return `describe(${varString})`;
+}
+
 var grammar = {
     Lexer: undefined,
     ParserRules: [
     {"name": "program$ebnf$1", "symbols": []},
     {"name": "program$ebnf$1$subexpression$1", "symbols": ["newl", "command"]},
     {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "program$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "program", "symbols": ["command", "program$ebnf$1"], "postprocess":  (data) => {
-        	const [command, otherCommands] = data;
+    {"name": "program", "symbols": ["___", "command", "program$ebnf$1", "___"], "postprocess":  (data) => {
+        	const [,command, otherCommands] = data;
         	const input = [command.input];
         	const parsed = [command.parsed];
         	otherCommands.map((commandSet) => commandSet[1])
@@ -88,6 +98,14 @@ var grammar = {
     {"name": "command", "symbols": ["_", "regression"], "postprocess":  (data) => {
         	const { input, parsed } = data[1];
         	return simpleCompose(input, composeRegression(parsed));
+        }},
+    {"name": "command", "symbols": ["_", "summarize"], "postprocess":  (data) => {
+        	const { input, parsed } = data[1];
+        	return simpleCompose(input, composeSummarize(parsed));
+        }},
+    {"name": "command", "symbols": ["_", "describe"], "postprocess":  (data) => {
+        	const { input, parsed } = data[1];
+        	return simpleCompose(input, composeDescribe(parsed));
         }},
     {"name": "command$string$1", "symbols": [{"literal":"t"}, {"literal":"e"}, {"literal":"s"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "command", "symbols": ["command$string$1"]},
@@ -105,6 +123,26 @@ var grammar = {
         	const parsed = [yvar.parsed, xArray.parsed];
         	return simpleCompose(input, parsed);
         }},
+    {"name": "summarize", "symbols": ["_summarize", "__", "condition"], "postprocess":  (data) => {
+        	const [summ,_, cond] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = summ.parsed.concat(cond.parsed);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "summarize", "symbols": ["_summarize", "_"], "postprocess": id},
+    {"name": "_summarize", "symbols": ["_summ", "multivar"], "postprocess":  (data) => {
+        	const [, varArray] = data;
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [varArray.parsed]);
+        }},
+    {"name": "_summarize", "symbols": ["_summ"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [[]]);	
+        }},
+    {"name": "_summ$string$1", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$1"]},
+    {"name": "_summ$string$2", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}, {"literal":"z"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$2"]},
     {"name": "multivar$ebnf$1$subexpression$1", "symbols": ["__", "var"]},
     {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1$subexpression$1"]},
     {"name": "multivar$ebnf$1$subexpression$2", "symbols": ["__", "var"]},
@@ -117,6 +155,20 @@ var grammar = {
         	});
         	return simpleCompose(input, parsed);
         }},
+    {"name": "describe", "symbols": ["_describe", "_"], "postprocess": id},
+    {"name": "_describe", "symbols": ["_desc", "multivar"], "postprocess":  (data) => {
+        	const [, varArray] = data;
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [varArray.parsed]);
+        }},
+    {"name": "_describe", "symbols": ["_desc"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [[]]);	
+        }},
+    {"name": "_desc$string$1", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$1"]},
+    {"name": "_desc$string$2", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}, {"literal":"b"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$2"]},
     {"name": "var$ebnf$1", "symbols": [/[\w]/]},
     {"name": "var$ebnf$1", "symbols": ["var$ebnf$1", /[\w]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "var", "symbols": ["var$ebnf$1"], "postprocess":  (data, _, reject) => {
@@ -144,9 +196,9 @@ var grammar = {
     {"name": "__$ebnf$1", "symbols": ["__$ebnf$1", /[ \t]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": composeWhitespace},
     {"name": "___$ebnf$1", "symbols": []},
-    {"name": "___$ebnf$1", "symbols": ["___$ebnf$1", /[\s]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "___$ebnf$1", "symbols": ["___$ebnf$1", /[\n\r]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "___", "symbols": ["___$ebnf$1"], "postprocess": composeWhitespace},
-    {"name": "newl$ebnf$1", "symbols": []},
+    {"name": "newl$ebnf$1", "symbols": [/[\n\r]/]},
     {"name": "newl$ebnf$1", "symbols": ["newl$ebnf$1", /[\n\r]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "newl", "symbols": ["newl$ebnf$1"], "postprocess": composeWhitespace}
 ]
