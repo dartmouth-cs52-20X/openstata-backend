@@ -10,16 +10,22 @@ router.get('/', (req, res) => {
 });
 
 /// your routes will go here
-router.route('/dofiles')
+router
+  .route('/dofiles')
   .post(requireAuth, DoFiles.createDoFile)
   .get(requireAuth, DoFiles.getDoFiles);
 
-router.route('/dofiles/:id')
+router
+  .route('/dofiles/:id')
   .get(requireAuth, DoFiles.getDoFile)
   .put(requireAuth, DoFiles.saveDoFile)
   .delete(requireAuth, DoFiles.deleteDoFile);
 
 router.post('/signin', requireSignin, UserController.signin);
 router.post('/signup', UserController.signup);
+
+router.get('/runcode', (req, res) => {
+  res.send(`Returned code and a random number ${Math.random() * 100}`);
+});
 
 export default router;
