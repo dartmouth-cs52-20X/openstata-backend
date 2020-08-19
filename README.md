@@ -32,8 +32,10 @@ To get backend running, yarn start. Hosted on Heroku.
 ## Deployment
 
 Frontend: Surge
+http://project-open-stata.surge.sh
 
 Backend: Heroku
+https://open-stata.herokuapp.com/
 
 Backend Microservice: Heroku
 
