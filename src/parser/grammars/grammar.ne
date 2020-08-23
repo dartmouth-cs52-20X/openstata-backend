@@ -36,6 +36,10 @@ command ->
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeDescribe(parsed));
 	} %} |
+	mean {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeMean(parsed));
+	} %} |
 
 	generate {% (data) => {
 		const { input, parsed } = data[0];
@@ -113,6 +117,31 @@ _describe ->
 	}%}
 
 _desc -> "d" | "de" | "des" | "desc" | "descr" | "descri" | "describ" | "describe"
+
+
+####### MEAN #######
+
+mean ->
+	_mean __ condition  {% (data) => {
+		const [mean,_, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = mean.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_mean {% id %}
+
+_mean ->
+	_me multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	}%} |
+	_me  {% (data) => {
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [[]]);
+	}%}
+
+_me -> "mean"
 
 
 
@@ -224,6 +253,37 @@ newl -> (_ [\n\r]):+ {% composeWhitespace %}
 ####### POSTPROCESSOR LIBRARY #######
 @{%
 
+function composeClear() {
+	return composeParsed('clear');
+}
+
+function composeUse(args) {
+	return composeParsed('use', args);
+}
+
+function composeSummarize([vars, condition]) {
+	return composeParsed('summarize', vars, condition);
+}
+
+function composeDescribe([vars]) {
+	return composeParsed('describe', vars);
+}
+
+function composeMean([vars, condition]) {
+	return composeParsed('mean', vars, condition);
+}
+
+
+function composeGenerate([varname, exp, condition]) {
+	return composeParsed('generate', [varname, exp], condition);
+}
+
+
+function composeRegression([yvar, xArray, condition]) {
+	return composeParsed('regress', [yvar, xArray], condition);
+}
+
+
 // replaces a few stata syntax things to python
 function cleanExpression(string) {
 	return string
@@ -280,6 +340,7 @@ function composeManyInputs(inputArray) {
 	}).join('');
 }
 
+// formats the parsed object, inserting nulls where needed
 function composeParsed(command, args, condition, options) {
 	return {
 		command: command || null,
@@ -288,30 +349,5 @@ function composeParsed(command, args, condition, options) {
 		options: options || null
 	};
 };
-
-// puts together a reg statement
-function composeRegression([yvar, xArray, condition]) {
-	return composeParsed('regress', [yvar, xArray], condition);
-}
-
-function composeSummarize([vars, condition]) {
-	return composeParsed('summarize', vars, condition);
-}
-
-function composeDescribe([vars]) {
-	return composeParsed('describe', vars);
-}
-
-function composeGenerate([varname, exp, condition]) {
-	return composeParsed('generate', [varname, exp], condition);
-}
-
-function composeClear() {
-	return composeParsed('clear');
-}
-
-function composeUse(args) {
-	return composeParsed('use', args);
-}
 
 %}

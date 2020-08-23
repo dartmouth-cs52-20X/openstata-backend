@@ -1,0 +1,168 @@
+using grammar file ../index
+
+file testcases/official
+actual read input:
+clear
+
+use "arjun.dta"
+use arjun.dta
+use arjun
+use folder/arjun
+
+use "url.csv"
+use "url.xlsx"
+use "url.dta"
+
+
+su
+su var1
+su var1 var2
+su var1 var2 if var3>10
+
+
+
+d
+d var1
+d var1 var2
+
+mean var1
+mean var1 var2
+mean var1 var2 if var3>10
+
+
+
+
+gen var1 = 10
+gen var1 = var2 + var3
+gen var1 = var2 if var3>10
+
+number of results: 1
+processed/regenerated input:
+[
+  'clear',
+  'use "arjun.dta"',
+  'use arjun.dta',
+  'use arjun',
+  'use folder/arjun',
+  'use "url.csv"',
+  'use "url.xlsx"',
+  'use "url.dta"',
+  'su',
+  'su var1',
+  'su var1 var2',
+  'su var1 var2 if var3>10',
+  'd',
+  'd var1',
+  'd var1 var2',
+  'mean var1',
+  'mean var1 var2',
+  'mean var1 var2 if var3>10',
+  'gen var1 = 10',
+  'gen var1 = var2 + var3',
+  'gen var1 = var2 if var3>10'
+]
+parsed python output:
+[
+  { command: 'clear', args: null, condition: null, options: null },
+  {
+    command: 'use',
+    args: [ '"arjun.dta"' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'use',
+    args: [ 'arjun.dta' ],
+    condition: null,
+    options: null
+  },
+  { command: 'use', args: [ 'arjun' ], condition: null, options: null },
+  {
+    command: 'use',
+    args: [ 'folder/arjun' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'use',
+    args: [ '"url.csv"' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'use',
+    args: [ '"url.xlsx"' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'use',
+    args: [ '"url.dta"' ],
+    condition: null,
+    options: null
+  },
+  { command: 'summarize', args: [], condition: null, options: null },
+  {
+    command: 'summarize',
+    args: [ 'var1' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'summarize',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'summarize',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null
+  },
+  { command: 'describe', args: [], condition: null, options: null },
+  {
+    command: 'describe',
+    args: [ 'var1' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'describe',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null
+  },
+  { command: 'mean', args: [ 'var1' ], condition: null, options: null },
+  {
+    command: 'mean',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'mean',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', '10' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', 'var2 + var3' ],
+    condition: null,
+    options: null
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null
+  }
+]
+

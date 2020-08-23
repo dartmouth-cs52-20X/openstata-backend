@@ -4,6 +4,37 @@
 function id(x) { return x[0]; }
 
 
+function composeClear() {
+	return composeParsed('clear');
+}
+
+function composeUse(args) {
+	return composeParsed('use', args);
+}
+
+function composeSummarize([vars, condition]) {
+	return composeParsed('summarize', vars, condition);
+}
+
+function composeDescribe([vars]) {
+	return composeParsed('describe', vars);
+}
+
+function composeMean([vars, condition]) {
+	return composeParsed('mean', vars, condition);
+}
+
+
+function composeGenerate([varname, exp, condition]) {
+	return composeParsed('generate', [varname, exp], condition);
+}
+
+
+function composeRegression([yvar, xArray, condition]) {
+	return composeParsed('regress', [yvar, xArray], condition);
+}
+
+
 // replaces a few stata syntax things to python
 function cleanExpression(string) {
 	return string
@@ -60,6 +91,7 @@ function composeManyInputs(inputArray) {
 	}).join('');
 }
 
+// formats the parsed object, inserting nulls where needed
 function composeParsed(command, args, condition, options) {
 	return {
 		command: command || null,
@@ -68,31 +100,6 @@ function composeParsed(command, args, condition, options) {
 		options: options || null
 	};
 };
-
-// puts together a reg statement
-function composeRegression([yvar, xArray, condition]) {
-	return composeParsed('regress', [yvar, xArray], condition);
-}
-
-function composeSummarize([vars, condition]) {
-	return composeParsed('summarize', vars, condition);
-}
-
-function composeDescribe([vars]) {
-	return composeParsed('describe', vars);
-}
-
-function composeGenerate([varname, exp, condition]) {
-	return composeParsed('generate', [varname, exp], condition);
-}
-
-function composeClear() {
-	return composeParsed('clear');
-}
-
-function composeUse(args) {
-	return composeParsed('use', args);
-}
 
 var grammar = {
     Lexer: undefined,
@@ -111,45 +118,50 @@ var grammar = {
         		});
         	return simpleCompose(input, parsed);
         }},
-    {"name": "command", "symbols": ["regression"], "postprocess":  (data) => {
-        	const { input, parsed } = data[0];
-        	return simpleCompose(input, composeRegression(parsed));
-        }},
-    {"name": "command", "symbols": ["summarize"], "postprocess":  (data) => {
-        	const { input, parsed } = data[0];
-        	return simpleCompose(input, composeSummarize(parsed));
-        }},
-    {"name": "command", "symbols": ["describe"], "postprocess":  (data) => {
-        	const { input, parsed } = data[0];
-        	return simpleCompose(input, composeDescribe(parsed));
-        }},
-    {"name": "command", "symbols": ["generate"], "postprocess":  (data) => {
-        	const { input, parsed } = data[0];
-        	return simpleCompose(input, composeGenerate(parsed));
-        }},
-    {"name": "command", "symbols": ["clear"], "postprocess":  (data) => { 
-        	return simpleCompose(data[0], composeClear()); 
+    {"name": "command", "symbols": ["clear"], "postprocess":  (data) => {
+        	return simpleCompose(data[0], composeClear());
         } },
     {"name": "command", "symbols": ["use"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeUse(parsed));
-        }},
+        } },
+    {"name": "command", "symbols": ["summarize"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeSummarize(parsed));
+        } },
+    {"name": "command", "symbols": ["describe"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeDescribe(parsed));
+        } },
+    {"name": "command", "symbols": ["mean"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeMean(parsed));
+        } },
+    {"name": "command", "symbols": ["generate"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeGenerate(parsed));
+        } },
+    {"name": "command", "symbols": ["regression"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeRegression(parsed));
+        } },
     {"name": "command$string$1", "symbols": [{"literal":"t"}, {"literal":"e"}, {"literal":"s"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "command", "symbols": ["command$string$1"]},
-    {"name": "regression", "symbols": ["_regression", "__", "condition"], "postprocess":  (data) => {
-        	const [reg,_, cond] = data;
+    {"name": "clear$string$1", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"e"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "clear", "symbols": ["clear$string$1"], "postprocess": id},
+    {"name": "use", "symbols": ["_use", "__", "url"], "postprocess":  (data) => {
+        	const url = data[2]
         	const input = composeManyInputs(data);
-        	const parsed = reg.parsed.concat(cond.parsed);
-        	return simpleCompose(input, parsed);
+        	return simpleCompose(input, [url]);
         } },
-    {"name": "regression", "symbols": ["_regression"], "postprocess": id},
-    {"name": "_regression$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "_regression", "symbols": ["_regression$string$1", "__", "var", "multivar"], "postprocess":  (data) => {
-        	const [,, yvar, xArray] = data;
-        	const input = composeManyInputs(data);
-        	const parsed = [yvar.parsed, xArray.parsed];
-        	return simpleCompose(input, parsed);
-        }},
+    {"name": "url$ebnf$1", "symbols": [/[\S]/]},
+    {"name": "url$ebnf$1", "symbols": ["url$ebnf$1", /[\S]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "url", "symbols": ["url$ebnf$1"], "postprocess": (data) => data[0].join('')},
+    {"name": "_use", "symbols": [{"literal":"u"}]},
+    {"name": "_use$string$1", "symbols": [{"literal":"u"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_use", "symbols": ["_use$string$1"]},
+    {"name": "_use$string$2", "symbols": [{"literal":"u"}, {"literal":"s"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_use", "symbols": ["_use$string$2"]},
     {"name": "summarize", "symbols": ["_summarize", "__", "condition"], "postprocess":  (data) => {
         	const [summ,_, cond] = data;
         	const input = composeManyInputs(data);
@@ -164,12 +176,68 @@ var grammar = {
         }},
     {"name": "_summarize", "symbols": ["_summ"], "postprocess":  (data) => {
         	const input = composeManyInputs(data);
-        	return simpleCompose(input, [[]]);	
+        	return simpleCompose(input, [[]]);
         }},
-    {"name": "_summ$string$1", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": [{"literal":"s"}]},
+    {"name": "_summ$string$1", "symbols": [{"literal":"s"}, {"literal":"u"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_summ", "symbols": ["_summ$string$1"]},
-    {"name": "_summ$string$2", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}, {"literal":"z"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ$string$2", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_summ", "symbols": ["_summ$string$2"]},
+    {"name": "_summ$string$3", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$3"]},
+    {"name": "_summ$string$4", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$4"]},
+    {"name": "_summ$string$5", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$5"]},
+    {"name": "_summ$string$6", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$6"]},
+    {"name": "_summ$string$7", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}, {"literal":"z"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$7"]},
+    {"name": "_summ$string$8", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}, {"literal":"z"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_summ", "symbols": ["_summ$string$8"]},
+    {"name": "describe", "symbols": ["_describe"], "postprocess": id},
+    {"name": "_describe", "symbols": ["_desc", "multivar"], "postprocess":  (data) => {
+        	const [, varArray] = data;
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [varArray.parsed]);
+        }},
+    {"name": "_describe", "symbols": ["_desc"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [[]]);
+        }},
+    {"name": "_desc", "symbols": [{"literal":"d"}]},
+    {"name": "_desc$string$1", "symbols": [{"literal":"d"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$1"]},
+    {"name": "_desc$string$2", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$2"]},
+    {"name": "_desc$string$3", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$3"]},
+    {"name": "_desc$string$4", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$4"]},
+    {"name": "_desc$string$5", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$5"]},
+    {"name": "_desc$string$6", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}, {"literal":"b"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$6"]},
+    {"name": "_desc$string$7", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}, {"literal":"b"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_desc", "symbols": ["_desc$string$7"]},
+    {"name": "mean", "symbols": ["_mean", "__", "condition"], "postprocess":  (data) => {
+        	const [mean,_, cond] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = mean.parsed.concat(cond.parsed);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "mean", "symbols": ["_mean"], "postprocess": id},
+    {"name": "_mean", "symbols": ["_me", "multivar"], "postprocess":  (data) => {
+        	const [, varArray] = data;
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [varArray.parsed]);
+        }},
+    {"name": "_mean", "symbols": ["_me"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [[]]);
+        }},
+    {"name": "_me$string$1", "symbols": [{"literal":"m"}, {"literal":"e"}, {"literal":"a"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_me", "symbols": ["_me$string$1"]},
     {"name": "generate", "symbols": ["_generate", "__", "condition"], "postprocess":  (data) => {
         	const [gen,_, cond] = data;
         	const input = composeManyInputs(data);
@@ -184,31 +252,21 @@ var grammar = {
         } },
     {"name": "_gen$string$1", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$1"]},
-    {"name": "describe", "symbols": ["_describe"], "postprocess": id},
-    {"name": "_describe", "symbols": ["_desc", "multivar"], "postprocess":  (data) => {
-        	const [, varArray] = data;
+    {"name": "regression", "symbols": ["_regression", "__", "condition"], "postprocess":  (data) => {
+        	const [reg,_, cond] = data;
         	const input = composeManyInputs(data);
-        	return simpleCompose(input, [varArray.parsed]);
-        }},
-    {"name": "_describe", "symbols": ["_desc"], "postprocess":  (data) => {
-        	const input = composeManyInputs(data);
-        	return simpleCompose(input, [[]]);	
-        }},
-    {"name": "_desc$string$1", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "_desc", "symbols": ["_desc$string$1"]},
-    {"name": "_desc$string$2", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}, {"literal":"b"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "_desc", "symbols": ["_desc$string$2"]},
-    {"name": "clear$string$1", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"e"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "clear", "symbols": ["clear$string$1"]},
-    {"name": "use$string$1", "symbols": [{"literal":"u"}, {"literal":"s"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "use", "symbols": ["use$string$1", "__", "url"], "postprocess":  (data) => {
-        	const url = data[2]
-        	const input = composeManyInputs(data);
-        	return simpleCompose(input, [url]);
+        	const parsed = reg.parsed.concat(cond.parsed);
+        	return simpleCompose(input, parsed);
         } },
-    {"name": "url$ebnf$1", "symbols": [/[\S]/]},
-    {"name": "url$ebnf$1", "symbols": ["url$ebnf$1", /[\S]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "url", "symbols": ["url$ebnf$1"], "postprocess": (data) => data[0].join('')},
+    {"name": "regression", "symbols": ["_regression"], "postprocess": id},
+    {"name": "_regression", "symbols": ["_reg", "__", "var", "multivar"], "postprocess":  (data) => {
+        	const [,, yvar, xArray] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = [yvar.parsed, xArray.parsed];
+        	return simpleCompose(input, parsed);
+        }},
+    {"name": "_reg$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_reg", "symbols": ["_reg$string$1"]},
     {"name": "multivar$ebnf$1$subexpression$1", "symbols": ["__", "var"]},
     {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1$subexpression$1"]},
     {"name": "multivar$ebnf$1$subexpression$2", "symbols": ["__", "var"]},

@@ -236,7 +236,7 @@ clear
 
 number of results: 1
 processed/regenerated input:
-[ [ 'clear' ] ]
+[ 'clear' ]
 parsed python output:
 [ { command: 'clear', args: null, condition: null, options: null } ]
 
