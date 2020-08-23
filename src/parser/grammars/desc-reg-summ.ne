@@ -48,7 +48,7 @@ function composeFromRaw(rawinput) {
 // can take an array of some raw text and some that are already parsed
 function composeManyInputs(inputArray) {
 	return inputArray.map((items) => {
-		if (items.input) {
+		if (items.input || items.input === '') {
 			return items.input
 		} else {
 			return items;	
@@ -63,10 +63,21 @@ function composeRegression([yvar, xArray, cond]) {
 	return `regress('${yvar}', ${xvars}, ${condString})`
 }
 
+function composeSummarize([vars, cond]) {
+	const condString = cond ? `\'${cond}\'` : 'None';
+	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	return `summarize(${varString}, ${condString})`;
+}
+
+function composeDescribe([vars]) {
+	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	return `describe(${varString})`;
+}
+
 %}
 
-program -> command (newl command):* {% (data) => {
-	const [command, otherCommands] = data;
+program -> ___ command (newl command):* ___ {% (data) => {
+	const [,command, otherCommands] = data;
 	const input = [command.input];
 	const parsed = [command.parsed];
 	otherCommands.map((commandSet) => commandSet[1])
@@ -82,6 +93,14 @@ program -> command (newl command):* {% (data) => {
 command -> _ regression {% (data) => {
 	const { input, parsed } = data[1];
 	return simpleCompose(input, composeRegression(parsed));
+}%}
+		| _ summarize {% (data) => {
+	const { input, parsed } = data[1];
+	return simpleCompose(input, composeSummarize(parsed));
+}%}
+		| _ describe {% (data) => {
+	const { input, parsed } = data[1];
+	return simpleCompose(input, composeDescribe(parsed));
 }%}
 		| "test" # more rules can just be tacked on with a pipe char
 
@@ -102,6 +121,26 @@ _regression -> "reg" __ var multivar {% (data) => {
 	return simpleCompose(input, parsed);
 }%}
 
+summarize -> _summarize __ condition  {% (data) => {
+					const [summ,_, cond] = data;
+					const input = composeManyInputs(data);
+					const parsed = summ.parsed.concat(cond.parsed);
+					return simpleCompose(input, parsed);
+				} %}
+		   | _summarize _ {% id %}
+
+_summarize -> _summ multivar {% (data) => {
+	const [, varArray] = data;
+	const input = composeManyInputs(data);
+	return simpleCompose(input, [varArray.parsed]);
+}%}
+		| _summ  {% (data) => {
+	const input = composeManyInputs(data);
+	return simpleCompose(input, [[]]);	
+}%}
+
+_summ -> "summ" | "summarize"
+
 # potental multiple indep vars
 multivar -> (__ var):+ null {% (data) => {
 	const rawinput = data[0];
@@ -111,6 +150,20 @@ multivar -> (__ var):+ null {% (data) => {
 	});
 	return simpleCompose(input, parsed);
 }%}
+
+describe -> _describe _ {% id %}
+
+_describe -> _desc multivar {% (data) => {
+	const [, varArray] = data;
+	const input = composeManyInputs(data);
+	return simpleCompose(input, [varArray.parsed]);
+}%}
+		| _desc {% (data) => {
+	const input = composeManyInputs(data);
+	return simpleCompose(input, [[]]);	
+}%}
+
+_desc -> "desc" | "describe"
 
 # single var
 var -> [\w]:+ {% (data, _, reject) => {
@@ -136,5 +189,5 @@ exp -> [\S] .:* null {% (data, _, reject) => {
 # Whitespace
 _ -> [ \t]:* {% composeWhitespace %}
 __ -> [ \t]:+ {% composeWhitespace %}
-___ -> [\s]:* {% composeWhitespace %}
-newl -> [\n\r]:* {% composeWhitespace %}
+___ -> [\n\r]:* {% composeWhitespace %}
+newl -> [\n\r]:+ {% composeWhitespace %}

@@ -1,6 +1,6 @@
 const readline = require('readline');
 const nearley = require('nearley');
-const grammar = require('./grammar');
+const grammar = require('../index');
 
 const rl = readline.createInterface({
   input: process.stdin,

@@ -1,0 +1,195 @@
+using grammar file ../index
+
+file testcases/describe
+actual read input:
+desc a d g
+
+desc
+
+
+number of results: 1
+processed/regenerated input:
+[ 'desc a d g', 'desc' ]
+parsed python output:
+[
+  { command: 'describe', args: [ 'a', 'd', 'g' ] },
+  { command: 'describe', args: [] }
+]
+
+
+file testcases/expressions
+actual read input:
+summ if a & b
+
+summ if a | b
+
+summ if !a
+
+summ if ~a
+
+summ if a != b
+
+summ if a ~= b
+
+summ if a^b == 10
+
+number of results: 1
+processed/regenerated input:
+[
+  'summ if a & b',
+  'summ if a | b',
+  'summ if !a',
+  'summ if ~a',
+  'summ if a != b',
+  'summ if a ~= b',
+  'summ if a^b == 10'
+]
+parsed python output:
+[
+  { command: 'summarize', args: [], condition: 'a & b' },
+  { command: 'summarize', args: [], condition: 'a | b' },
+  { command: 'summarize', args: [], condition: '~a' },
+  { command: 'summarize', args: [], condition: '~a' },
+  { command: 'summarize', args: [], condition: 'a != b' },
+  { command: 'summarize', args: [], condition: 'a != b' },
+  { command: 'summarize', args: [], condition: 'a**b == 10' }
+]
+
+
+file testcases/regression
+actual read input:
+reg y x
+
+reg y x if income > 100
+
+reg y x1 x2 x3
+
+reg y x2 x3 if x2 < 7 & x3 < 5
+
+number of results: 1
+processed/regenerated input:
+[
+  'reg y x',
+  'reg y x if income > 100',
+  'reg y x1 x2 x3',
+  'reg y x2 x3 if x2 < 7 & x3 < 5'
+]
+parsed python output:
+[
+  { command: 'regress', args: [ 'y', [ 'x' ] ], condition: undefined },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x' ] ],
+    condition: 'income > 100'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: undefined
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x2', 'x3' ] ],
+    condition: 'x2 < 7 & x3 < 5'
+  }
+]
+
+
+file testcases/summarize
+actual read input:
+summ a
+
+summ if hi
+
+summarize
+
+summ a b c if x
+
+number of results: 1
+processed/regenerated input:
+[ 'summ a', 'summ if hi', 'summarize', 'summ a b c if x' ]
+parsed python output:
+[
+  { command: 'summarize', args: [ 'a' ], condition: undefined },
+  { command: 'summarize', args: [], condition: 'hi' },
+  { command: 'summarize', args: [], condition: undefined },
+  { command: 'summarize', args: [ 'a', 'b', 'c' ], condition: 'x' }
+]
+
+
+file testcases/weirdwhitespace
+actual read input:
+  
+
+   
+
+                    
+  reg y t1 t2 if salary >= 100     
+
+  
+
+   
+    
+
+ 
+
+   
+  reg y x s         
+        
+                              reg income age parental_income           
+          
+
+     
+ 
+
+     
+
+number of results: 1
+processed/regenerated input:
+[
+  'reg y t1 t2 if salary >= 100',
+  'reg y x s',
+  'reg income age parental_income'
+]
+parsed python output:
+[
+  {
+    command: 'regress',
+    args: [ 'y', [ 't1', 't2' ] ],
+    condition: 'salary >= 100'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x', 's' ] ],
+    condition: undefined
+  },
+  {
+    command: 'regress',
+    args: [ 'income', [ 'age', 'parental_income' ] ],
+    condition: undefined
+  }
+]
+
+
+file testcases/use
+actual read input:
+use some_url
+
+number of results: 1
+processed/regenerated input:
+[ 'use some_url' ]
+parsed python output:
+[ { command: 'use', args: [ 'some_url' ] } ]
+
+
+file testcases/clear
+actual read input:
+clear
+asf
+
+Syntax error at line 2 col 1:
+
+1 clear
+2 asf
+  ^
+

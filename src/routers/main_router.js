@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as DoFiles from './controllers/dofile_controller';
-import * as UserController from './controllers/user_controller';
-import { requireAuth, requireSignin } from './services/passport';
+import * as DoFiles from '../controllers/dofile_controller';
+import * as UserController from '../controllers/user_controller';
+import { requireAuth, requireSignin } from '../services/passport';
 
 const router = Router();
 
