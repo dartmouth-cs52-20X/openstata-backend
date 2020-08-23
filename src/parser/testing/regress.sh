@@ -69,5 +69,6 @@ diff -r --brief $currdate $dirname
 if [ $? == 0 ]
 then
     echo no differences
+    exit 0
 fi
 exit 1

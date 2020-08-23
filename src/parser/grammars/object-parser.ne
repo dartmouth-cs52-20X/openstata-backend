@@ -3,11 +3,11 @@
 
 ####### STRUCTURE #######
 
-program -> ___ command (newl command):* ___ {% (data) => {
-	const [,command, otherCommands] = data;
+program -> ___b _ command (newl _ command):* ___a {% (data) => {
+	const [,,command, otherCommands] = data;
 	const input = [command.input];
 	const parsed = [command.parsed];
-	otherCommands.map((commandSet) => commandSet[1])
+	otherCommands.map((commandSet) => commandSet[2])
 		.forEach((nextCommand) => {
 			input.push(nextCommand.input);
 			parsed.push(nextCommand.parsed);
@@ -20,20 +20,20 @@ program -> ___ command (newl command):* ___ {% (data) => {
 
 # the first grammar instruction is the 'main' top-level instruction
 # this implementation only does single line commands
-command -> _ regression {% (data) => {
-	const { input, parsed } = data[1];
+command -> regression {% (data) => {
+	const { input, parsed } = data[0];
 	return simpleCompose(input, composeRegression(parsed));
 }%}
-		| _ summarize {% (data) => {
-	const { input, parsed } = data[1];
+		| summarize {% (data) => {
+	const { input, parsed } = data[0];
 	return simpleCompose(input, composeSummarize(parsed));
 }%}
-		| _ describe {% (data) => {
-	const { input, parsed } = data[1];
+		| describe {% (data) => {
+	const { input, parsed } = data[0];
 	return simpleCompose(input, composeDescribe(parsed));
 }%}
-		| _ generate {% (data) => {
-	//const { input, parsed } = data[1];
+		| generate {% (data) => {
+	//const { input, parsed } = data[0];
 	//return simpleCompose(input, composeDescribe(parsed));
 }%}
 		| "test" # more rules can just be tacked on with a pipe char
@@ -87,7 +87,12 @@ _summ -> "summ" | "summarize"
 generate -> _generate __ condition
 		| _generate _
 
-_generate -> _gen _ var _ "=" _ exp
+_generate -> _gen _ var _ "=" _ exp {% (data) => {
+	const [,,varName,,,,exp] = data;
+	const input = composeManyInputs(data);
+	console.log(input);
+	return null;
+} %}
 
 _gen -> "gen"
 
@@ -149,8 +154,9 @@ exp -> [\S] .:* null {% (data, _, reject) => {
 # Whitespace
 _ -> [ \t]:* {% composeWhitespace %}
 __ -> [ \t]:+ {% composeWhitespace %}
-___ -> [\n\r]:* {% composeWhitespace %}
-newl -> [\n\r]:+ {% composeWhitespace %}
+___b -> (_ [\n\r]):* {% composeWhitespace %}
+___a -> ([\n\r] _):* {% composeWhitespace %}
+newl -> (_ [\n\r]):+ {% composeWhitespace %}
 
 
 ####### POSTPROCESSOR LIBRARY #######

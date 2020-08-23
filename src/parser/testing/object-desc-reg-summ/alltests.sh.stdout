@@ -116,3 +116,45 @@ parsed python output:
   { command: 'summarize', args: [ 'a', 'b', 'c' ], condition: 'x' }
 ]
 
+
+file testcases/weirdwhitespace
+actual read input:
+            
+   reg y t1 t2 if salary >= 100
+     
+ reg y x s
+               
+  reg income age parental_income 
+          
+
+   
+ 
+           
+    
+
+number of results: 1
+processed/regenerated input:
+[
+  'reg y t1 t2 if salary >= 100',
+  'reg y x s',
+  'reg income age parental_income'
+]
+parsed python output:
+[
+  {
+    command: 'regress',
+    args: [ 'y', [ 't1', 't2' ] ],
+    condition: 'salary >= 100'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x', 's' ] ],
+    condition: undefined
+  },
+  {
+    command: 'regress',
+    args: [ 'income', [ 'age', 'parental_income' ] ],
+    condition: undefined
+  }
+]
+
