@@ -248,37 +248,38 @@ function composeManyInputs(inputArray) {
 	}).join('');
 }
 
+function composeParsed(command, args, condition, options) {
+	return {
+		command: command || null,
+		args: args || null,
+		condition: condition || null,
+		options: options || null
+	};
+};
+
 // puts together a reg statement
 function composeRegression([yvar, xArray, condition]) {
-	//const condString = cond ? `\'${cond}\'` : 'None';
-	//const xvars = `[${xArray.map((xvar) => `'${xvar}'`).join()}]`
-	//return `regress('${yvar}', ${xvars}, ${condString})`
-	return { command: 'regress', args: [yvar, xArray], condition };
+	return composeParsed('regress', [yvar, xArray], condition);
 }
 
 function composeSummarize([vars, condition]) {
-	//const condString = cond ? `\'${cond}\'` : 'None';
-	//const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
-	//return `summarize(${varString}, ${condString})`;
-	return { command: 'summarize', args: vars, condition };
+	return composeParsed('summarize', vars, condition);
 }
 
 function composeDescribe([vars]) {
-	//const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
-	//return `describe(${varString})`;
-	return { command: 'describe', args: vars };
+	return composeParsed('describe', vars);
 }
 
 function composeGenerate([varname, exp, condition]) {
-	return { command: 'generate', args: [varname, exp], condition };
+	return composeParsed('generate', [varname, exp], condition);
 }
 
 function composeClear() {
-	return { command: 'clear' };
+	return composeParsed('clear');
 }
 
 function composeUse(args) {
-	return { command: 'use', args };
+	return composeParsed('use', args);
 }
 
 %}
