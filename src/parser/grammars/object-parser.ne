@@ -33,8 +33,15 @@ command -> regression {% (data) => {
 	return simpleCompose(input, composeDescribe(parsed));
 }%}
 		| generate {% (data) => {
-	//const { input, parsed } = data[0];
-	//return simpleCompose(input, composeDescribe(parsed));
+	const { input, parsed } = data[0];
+	return simpleCompose(input, composeGenerate(parsed));
+}%}
+		| clear {% (data) => { 
+	return simpleCompose(data[0], composeClear()); 
+} %}
+		| use {% (data) => {
+	const { input, parsed } = data[0];
+	return simpleCompose(input, composeUse(parsed));
 }%}
 		| "test" # more rules can just be tacked on with a pipe char
 
@@ -84,14 +91,18 @@ _summ -> "summ" | "summarize"
 
 ####### GENERATE #######
 
-generate -> _generate __ condition
-		| _generate
+generate -> _generate __ condition {% (data) => {
+					const [gen,_, cond] = data;
+					const input = composeManyInputs(data);
+					const parsed = gen.parsed.concat(cond.parsed);
+					return simpleCompose(input, parsed);
+				} %}
+		| _generate {% id %}
 
-_generate -> _gen _ var _ "=" _ exp {% (data) => {
+_generate -> _gen __ var __ "=" __ exp {% (data) => {
 	const [,,varName,,,,exp] = data;
 	const input = composeManyInputs(data);
-	console.log(input);
-	return null;
+	return simpleCompose(input, [varName.parsed, exp.parsed]);
 } %}
 
 _gen -> "gen"
@@ -113,6 +124,22 @@ _describe -> _desc multivar {% (data) => {
 }%}
 
 _desc -> "desc" | "describe"
+
+
+####### CLEAR #######
+
+clear -> "clear"
+
+
+####### USE #######
+
+use -> "use" __ url {% (data) => {
+	const url = data[2]
+	const input = composeManyInputs(data);
+	return simpleCompose(input, [url]);
+} %}
+
+url -> [\S]:+ {% (data) => data[0].join('') %}
 
 
 ####### BASIC SYNTAX #######
@@ -150,6 +177,7 @@ exp -> [\S]:+ (__ [\S]:+):* {% (data, _, reject) => {
 	if (input.includes('if')) return reject;
 	return composeUsingFunction(input, cleanExpression);
 }%}
+
 
 ####### PRIMITIVES #######
 
@@ -239,6 +267,18 @@ function composeDescribe([vars]) {
 	//const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
 	//return `describe(${varString})`;
 	return { command: 'describe', args: vars };
+}
+
+function composeGenerate([varname, exp, condition]) {
+	return { command: 'generate', args: [varname, exp], condition };
+}
+
+function composeClear() {
+	return { command: 'clear' };
+}
+
+function composeUse(args) {
+	return { command: 'use', args };
 }
 
 %}

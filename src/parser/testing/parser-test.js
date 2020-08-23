@@ -28,7 +28,9 @@ process.argv.slice(3).forEach((arg) => {
     console.log();
     return 0;
   } catch (error) {
-    console.log(error);
+    const pos = error.message.indexOf('Unexpected "');
+    const message = error.message.slice(0, pos - 1);
+    console.log(message);
     return 2;
   }
 });
