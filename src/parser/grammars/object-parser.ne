@@ -3,7 +3,7 @@
 
 ####### STRUCTURE #######
 
-program -> ___b _ command (newl _ command):* ___a {% (data) => {
+program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 	const [,,command, otherCommands] = data;
 	const input = [command.input];
 	const parsed = [command.parsed];
@@ -48,7 +48,7 @@ regression ->  _regression __ condition {% (data) => {
 					const parsed = reg.parsed.concat(cond.parsed);
 					return simpleCompose(input, parsed);
 				} %}
-			|  _regression _ {% id %}
+			|  _regression {% id %}
 
 # actual reg syntax here
 _regression -> "reg" __ var multivar {% (data) => {
@@ -67,7 +67,7 @@ summarize -> _summarize __ condition  {% (data) => {
 					const parsed = summ.parsed.concat(cond.parsed);
 					return simpleCompose(input, parsed);
 				} %}
-		   | _summarize _ {% id %}
+		   | _summarize {% id %}
 
 _summarize -> _summ multivar {% (data) => {
 	const [, varArray] = data;
@@ -85,7 +85,7 @@ _summ -> "summ" | "summarize"
 ####### GENERATE #######
 
 generate -> _generate __ condition
-		| _generate _
+		| _generate
 
 _generate -> _gen _ var _ "=" _ exp {% (data) => {
 	const [,,varName,,,,exp] = data;
@@ -100,7 +100,7 @@ _gen -> "gen"
 
 ####### DESCRIBE #######
 
-describe -> _describe _ {% id %}
+describe -> _describe {% id %}
 
 _describe -> _desc multivar {% (data) => {
 	const [, varArray] = data;
@@ -142,12 +142,14 @@ condition -> "if" __ exp {% (data) => {
 }%}
 
 # directly translates a condition to python without parsing, using regex
-exp -> [\S] .:* null {% (data, _, reject) => {
-	const input = data[0] + data[1].join('');
+exp -> [\S]:+ (__ [\S]:+):* {% (data, _, reject) => {
+	const [term1, otherterms] = data;
+	const input = term1.join('') + otherterms.map((termexp) => {
+		return termexp[0].input + termexp[1].join('');
+	}).join('');
 	if (input.includes('if')) return reject;
 	return composeUsingFunction(input, cleanExpression);
 }%}
-
 
 ####### PRIMITIVES #######
 
@@ -217,7 +219,6 @@ function composeManyInputs(inputArray) {
 		}
 	}).join('');
 }
-
 
 // puts together a reg statement
 function composeRegression([yvar, xArray, condition]) {
