@@ -20,126 +20,158 @@ program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 
 # the first grammar instruction is the 'main' top-level instruction
 # this implementation only does single line commands
-command -> regression {% (data) => {
-	const { input, parsed } = data[0];
-	return simpleCompose(input, composeRegression(parsed));
-}%}
-		| summarize {% (data) => {
-	const { input, parsed } = data[0];
-	return simpleCompose(input, composeSummarize(parsed));
-}%}
-		| describe {% (data) => {
-	const { input, parsed } = data[0];
-	return simpleCompose(input, composeDescribe(parsed));
-}%}
-		| generate {% (data) => {
-	const { input, parsed } = data[0];
-	return simpleCompose(input, composeGenerate(parsed));
-}%}
-		| clear {% (data) => { 
-	return simpleCompose(data[0], composeClear()); 
-} %}
-		| use {% (data) => {
-	const { input, parsed } = data[0];
-	return simpleCompose(input, composeUse(parsed));
-}%}
-		| "test" # more rules can just be tacked on with a pipe char
+command ->
+	clear {% (data) => {
+		return simpleCompose(data[0], composeClear());
+	} %} |
+	use {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeUse(parsed));
+	} %} |
+	summarize {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeSummarize(parsed));
+	} %} |
+	describe {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeDescribe(parsed));
+	} %} |
+
+	generate {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeGenerate(parsed));
+	} %} |
+
+	regression {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeRegression(parsed));
+	} %} |
 
 
-####### REGRESS #######
+	"test" # more rules can just be tacked on with a pipe char
 
-# pipe since regression can happen either with or w/o an if condition
-regression ->  _regression __ condition {% (data) => {
-					const [reg,_, cond] = data;
-					const input = composeManyInputs(data);
-					const parsed = reg.parsed.concat(cond.parsed);
-					return simpleCompose(input, parsed);
-				} %}
-			|  _regression {% id %}
 
-# actual reg syntax here
-_regression -> "reg" __ var multivar {% (data) => {
-	const [,, yvar, xArray] = data;
-	const input = composeManyInputs(data);
-	const parsed = [yvar.parsed, xArray.parsed];
-	return simpleCompose(input, parsed);
-}%}
+
+
+####### CLEAR #######
+
+clear -> "clear" {% id %}
+
+
+####### USE #######
+
+use ->
+	_use __ url {% (data) => {
+		const url = data[2]
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [url]);
+	} %}
+
+url -> [\S]:+ {% (data) => data[0].join('') %}
+
+_use -> "u" | "us" | "use"
 
 
 ####### SUMMARIZE #######
 
-summarize -> _summarize __ condition  {% (data) => {
-					const [summ,_, cond] = data;
-					const input = composeManyInputs(data);
-					const parsed = summ.parsed.concat(cond.parsed);
-					return simpleCompose(input, parsed);
-				} %}
-		   | _summarize {% id %}
+summarize ->
+	_summarize __ condition  {% (data) => {
+		const [summ,_, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = summ.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_summarize {% id %}
 
-_summarize -> _summ multivar {% (data) => {
-	const [, varArray] = data;
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [varArray.parsed]);
-}%}
-		| _summ  {% (data) => {
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [[]]);	
-}%}
+_summarize ->
+	_summ multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	}%} |
+	_summ  {% (data) => {
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [[]]);
+	}%}
 
-_summ -> "summ" | "summarize"
-
-
-####### GENERATE #######
-
-generate -> _generate __ condition {% (data) => {
-					const [gen,_, cond] = data;
-					const input = composeManyInputs(data);
-					const parsed = gen.parsed.concat(cond.parsed);
-					return simpleCompose(input, parsed);
-				} %}
-		| _generate {% id %}
-
-_generate -> _gen __ var __ "=" __ exp {% (data) => {
-	const [,,varName,,,,exp] = data;
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [varName.parsed, exp.parsed]);
-} %}
-
-_gen -> "gen"
-
+_summ -> "s" | "su" | "sum" | "summ" | "summa" | "summar" | "summari" | "summariz" | "summarize"
 
 
 ####### DESCRIBE #######
 
 describe -> _describe {% id %}
 
-_describe -> _desc multivar {% (data) => {
-	const [, varArray] = data;
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [varArray.parsed]);
-}%}
-		| _desc {% (data) => {
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [[]]);	
-}%}
+_describe ->
+	_desc multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	}%} |
+	_desc {% (data) => {
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [[]]);
+	}%}
 
-_desc -> "desc" | "describe"
-
-
-####### CLEAR #######
-
-clear -> "clear"
+_desc -> "d" | "de" | "des" | "desc" | "descr" | "descri" | "describ" | "describe"
 
 
-####### USE #######
 
-use -> "use" __ url {% (data) => {
-	const url = data[2]
-	const input = composeManyInputs(data);
-	return simpleCompose(input, [url]);
-} %}
 
-url -> [\S]:+ {% (data) => data[0].join('') %}
+
+
+
+
+
+####### GENERATE #######
+
+generate ->
+	_generate __ condition {% (data) => {
+		const [gen,_, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = gen.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_generate {% id %}
+
+_generate ->
+	_gen __ var __ "=" __ exp {% (data) => {
+		const [,,varName,,,,exp] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varName.parsed, exp.parsed]);
+	} %}
+
+_gen -> "gen"
+
+
+
+
+
+
+####### REGRESS #######
+
+# pipe since regression can happen either with or w/o an if condition
+regression ->
+	_regression __ condition {% (data) => {
+		const [reg,_, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = reg.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_regression {% id %}
+
+# actual reg syntax here
+_regression ->
+	_reg __ var multivar {% (data) => {
+		const [,, yvar, xArray] = data;
+		const input = composeManyInputs(data);
+		const parsed = [yvar.parsed, xArray.parsed];
+		return simpleCompose(input, parsed);
+	}%}
+
+_reg -> "reg"
+
+
+
 
 
 ####### BASIC SYNTAX #######
