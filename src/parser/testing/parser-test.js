@@ -24,7 +24,7 @@ process.argv.slice(3).forEach((arg) => {
     console.log('processed/regenerated input:');
     console.log(results[0].input);
     console.log('parsed python output:');
-    console.log(results[0].parsed);
+    console.dir(results[0].parsed, { depth: null });
     console.log();
     return 0;
   } catch (error) {

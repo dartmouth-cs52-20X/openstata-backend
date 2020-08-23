@@ -7,8 +7,8 @@ function id(x) { return x[0]; }
 // replaces a few stata syntax things to python
 function cleanExpression(string) {
 	return string
-		.replace(/(!|~)(?![=])/g, ' not ')
 		.replace(/~/g, '!')
+		.replace(/(!|~)(?![=])/g, '~')
 		.replace(/\^/g, '**')
 }
 
@@ -60,22 +60,26 @@ function composeManyInputs(inputArray) {
 	}).join('');
 }
 
+
 // puts together a reg statement
-function composeRegression([yvar, xArray, cond]) {
-	const condString = cond ? `\'${cond}\'` : 'None';
-	const xvars = `[${xArray.map((xvar) => `'${xvar}'`).join()}]`
-	return `regress('${yvar}', ${xvars}, ${condString})`
+function composeRegression([yvar, xArray, condition]) {
+	//const condString = cond ? `\'${cond}\'` : 'None';
+	//const xvars = `[${xArray.map((xvar) => `'${xvar}'`).join()}]`
+	//return `regress('${yvar}', ${xvars}, ${condString})`
+	return { command: 'regress', args: [yvar, xArray], condition };
 }
 
-function composeSummarize([vars, cond]) {
-	const condString = cond ? `\'${cond}\'` : 'None';
-	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
-	return `summarize(${varString}, ${condString})`;
+function composeSummarize([vars, condition]) {
+	//const condString = cond ? `\'${cond}\'` : 'None';
+	//const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	//return `summarize(${varString}, ${condString})`;
+	return { command: 'summarize', args: vars, condition };
 }
 
 function composeDescribe([vars]) {
-	const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
-	return `describe(${varString})`;
+	//const varString = `[${vars.map((avar) => `'${avar}'`).join()}]`
+	//return `describe(${varString})`;
+	return { command: 'describe', args: vars };
 }
 
 var grammar = {
@@ -106,6 +110,10 @@ var grammar = {
     {"name": "command", "symbols": ["_", "describe"], "postprocess":  (data) => {
         	const { input, parsed } = data[1];
         	return simpleCompose(input, composeDescribe(parsed));
+        }},
+    {"name": "command", "symbols": ["_", "generate"], "postprocess":  (data) => {
+        	//const { input, parsed } = data[1];
+        	//return simpleCompose(input, composeDescribe(parsed));
         }},
     {"name": "command$string$1", "symbols": [{"literal":"t"}, {"literal":"e"}, {"literal":"s"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "command", "symbols": ["command$string$1"]},
@@ -143,18 +151,11 @@ var grammar = {
     {"name": "_summ", "symbols": ["_summ$string$1"]},
     {"name": "_summ$string$2", "symbols": [{"literal":"s"}, {"literal":"u"}, {"literal":"m"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"i"}, {"literal":"z"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_summ", "symbols": ["_summ$string$2"]},
-    {"name": "multivar$ebnf$1$subexpression$1", "symbols": ["__", "var"]},
-    {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1$subexpression$1"]},
-    {"name": "multivar$ebnf$1$subexpression$2", "symbols": ["__", "var"]},
-    {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1", "multivar$ebnf$1$subexpression$2"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "multivar", "symbols": ["multivar$ebnf$1"], "postprocess":  (data) => {
-        	const rawinput = data[0];
-        	const input = composeFromRaw(rawinput);
-        	const parsed = rawinput.map((item) => { 
-        		return item[1].parsed;
-        	});
-        	return simpleCompose(input, parsed);
-        }},
+    {"name": "generate", "symbols": ["_generate", "__", "condition"]},
+    {"name": "generate", "symbols": ["_generate", "_"]},
+    {"name": "_generate", "symbols": ["_gen", "_", "var", "_", {"literal":"="}, "_", "exp"]},
+    {"name": "_gen$string$1", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen", "symbols": ["_gen$string$1"]},
     {"name": "describe", "symbols": ["_describe", "_"], "postprocess": id},
     {"name": "_describe", "symbols": ["_desc", "multivar"], "postprocess":  (data) => {
         	const [, varArray] = data;
@@ -169,6 +170,18 @@ var grammar = {
     {"name": "_desc", "symbols": ["_desc$string$1"]},
     {"name": "_desc$string$2", "symbols": [{"literal":"d"}, {"literal":"e"}, {"literal":"s"}, {"literal":"c"}, {"literal":"r"}, {"literal":"i"}, {"literal":"b"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_desc", "symbols": ["_desc$string$2"]},
+    {"name": "multivar$ebnf$1$subexpression$1", "symbols": ["__", "var"]},
+    {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1$subexpression$1"]},
+    {"name": "multivar$ebnf$1$subexpression$2", "symbols": ["__", "var"]},
+    {"name": "multivar$ebnf$1", "symbols": ["multivar$ebnf$1", "multivar$ebnf$1$subexpression$2"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "multivar", "symbols": ["multivar$ebnf$1"], "postprocess":  (data) => {
+        	const rawinput = data[0];
+        	const input = composeFromRaw(rawinput);
+        	const parsed = rawinput.map((item) => { 
+        		return item[1].parsed;
+        	});
+        	return simpleCompose(input, parsed);
+        }},
     {"name": "var$ebnf$1", "symbols": [/[\w]/]},
     {"name": "var$ebnf$1", "symbols": ["var$ebnf$1", /[\w]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "var", "symbols": ["var$ebnf$1"], "postprocess":  (data, _, reject) => {
