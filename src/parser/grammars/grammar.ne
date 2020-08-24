@@ -5,14 +5,23 @@
 
 program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 	const [,,command, otherCommands] = data;
-	const input = [command.input];
-	const parsed = [command.parsed];
+	const output = [command.parsed];
+	output[0].input = command.input;
 	otherCommands.map((commandSet) => commandSet[2])
 		.forEach((nextCommand) => {
-			input.push(nextCommand.input);
-			parsed.push(nextCommand.parsed);
+			const newCommand = nextCommand.parsed;
+			newCommand.input = nextCommand.input;
+			output.push(newCommand);
 		});
-	return simpleCompose(input, parsed);
+	return output;
+	//const input = [command.input];
+	//const parsed = [command.parsed];
+	//otherCommands.map((commandSet) => commandSet[2])
+	//	.forEach((nextCommand) => {
+	//		input.push(nextCommand.input);
+	//		parsed.push(nextCommand.parsed);
+	//	});
+	//return simpleCompose(input, parsed);
 }%}
 
 

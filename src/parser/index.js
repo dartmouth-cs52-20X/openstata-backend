@@ -109,14 +109,23 @@ var grammar = {
     {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "program$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "program", "symbols": ["___b", "_", "command", "program$ebnf$1", "_", "___a"], "postprocess":  (data) => {
         	const [,,command, otherCommands] = data;
-        	const input = [command.input];
-        	const parsed = [command.parsed];
+        	const output = [command.parsed];
+        	output[0].input = command.input;
         	otherCommands.map((commandSet) => commandSet[2])
         		.forEach((nextCommand) => {
-        			input.push(nextCommand.input);
-        			parsed.push(nextCommand.parsed);
+        			const newCommand = nextCommand.parsed;
+        			newCommand.input = nextCommand.input;
+        			output.push(newCommand);
         		});
-        	return simpleCompose(input, parsed);
+        	return output;
+        	//const input = [command.input];
+        	//const parsed = [command.parsed];
+        	//otherCommands.map((commandSet) => commandSet[2])
+        	//	.forEach((nextCommand) => {
+        	//		input.push(nextCommand.input);
+        	//		parsed.push(nextCommand.parsed);
+        	//	});
+        	//return simpleCompose(input, parsed);
         }},
     {"name": "command", "symbols": ["clear"], "postprocess":  (data) => {
         	return simpleCompose(data[0], composeClear());
