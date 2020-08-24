@@ -14,14 +14,6 @@ program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 			output.push(newCommand);
 		});
 	return output;
-	//const input = [command.input];
-	//const parsed = [command.parsed];
-	//otherCommands.map((commandSet) => commandSet[2])
-	//	.forEach((nextCommand) => {
-	//		input.push(nextCommand.input);
-	//		parsed.push(nextCommand.parsed);
-	//	});
-	//return simpleCompose(input, parsed);
 }%}
 
 
@@ -184,7 +176,7 @@ generate ->
 	_generate {% id %}
 
 _generate ->
-	_gen __ var __ "=" __ exp {% (data) => {
+	_gen __ var _ "=" _ exp {% (data) => {
 		const [,,varName,,,,exp] = data;
 		const input = composeManyInputs(data);
 		return simpleCompose(input, [varName.parsed, exp.parsed]);
@@ -205,7 +197,7 @@ replace ->
 	_replace {% id %}
 
 _replace ->
-	_rep __ var __ "=" __ exp {% (data) => {
+	_rep __ var _ "=" _ exp {% (data) => {
 		const [,,varName,,,,exp] = data;
 		const input = composeManyInputs(data);
 		return simpleCompose(input, [varName.parsed, exp.parsed]);

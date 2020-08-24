@@ -132,14 +132,6 @@ var grammar = {
         			output.push(newCommand);
         		});
         	return output;
-        	//const input = [command.input];
-        	//const parsed = [command.parsed];
-        	//otherCommands.map((commandSet) => commandSet[2])
-        	//	.forEach((nextCommand) => {
-        	//		input.push(nextCommand.input);
-        	//		parsed.push(nextCommand.parsed);
-        	//	});
-        	//return simpleCompose(input, parsed);
         }},
     {"name": "command", "symbols": ["clear"], "postprocess":  (data) => {
         	return simpleCompose(data[0], composeClear());
@@ -280,7 +272,7 @@ var grammar = {
         	return simpleCompose(input, parsed);
         } },
     {"name": "generate", "symbols": ["_generate"], "postprocess": id},
-    {"name": "_generate", "symbols": ["_gen", "__", "var", "__", {"literal":"="}, "__", "exp"], "postprocess":  (data) => {
+    {"name": "_generate", "symbols": ["_gen", "__", "var", "_", {"literal":"="}, "_", "exp"], "postprocess":  (data) => {
         	const [,,varName,,,,exp] = data;
         	const input = composeManyInputs(data);
         	return simpleCompose(input, [varName.parsed, exp.parsed]);
@@ -307,7 +299,7 @@ var grammar = {
         	return simpleCompose(input, parsed);
         } },
     {"name": "replace", "symbols": ["_replace"], "postprocess": id},
-    {"name": "_replace", "symbols": ["_rep", "__", "var", "__", {"literal":"="}, "__", "exp"], "postprocess":  (data) => {
+    {"name": "_replace", "symbols": ["_rep", "__", "var", "_", {"literal":"="}, "_", "exp"], "postprocess":  (data) => {
         	const [,,varName,,,,exp] = data;
         	const input = composeManyInputs(data);
         	return simpleCompose(input, [varName.parsed, exp.parsed]);
