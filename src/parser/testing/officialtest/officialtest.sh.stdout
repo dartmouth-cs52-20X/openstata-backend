@@ -13,13 +13,10 @@ use "url.csv"
 use "url.xlsx"
 use "url.dta"
 
-
 su
 su var1
 su var1 var2
 su var1 var2 if var3>10
-
-
 
 d
 d var1
@@ -30,11 +27,24 @@ mean var1 var2
 mean var1 var2 if var3>10
 
 
-
-
 gen var1 = 10
 gen var1 = var2 + var3
 gen var1 = var2 if var3>10
+
+replace var1 = 10
+replace var1 = var2 + var3
+replace var1 = var2 if var3>10
+
+rename oldname newname
+
+drop v1
+drop v1 v2 v3
+drop if var1>var2
+
+keep v1
+keep v1 v2 v3
+keep if var1>var2
+
 
 number of results: 1
 parsed AST with regenerated inputs
@@ -185,6 +195,76 @@ parsed AST with regenerated inputs
     condition: 'var3>10',
     options: null,
     input: 'gen var1 = var2 if var3>10'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', '10' ],
+    condition: null,
+    options: null,
+    input: 'replace var1 = 10'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', 'var2 + var3' ],
+    condition: null,
+    options: null,
+    input: 'replace var1 = var2 + var3'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'replace var1 = var2 if var3>10'
+  },
+  {
+    command: 'rename',
+    args: [ 'oldname', 'newname' ],
+    condition: null,
+    options: null,
+    input: 'rename oldname newname'
+  },
+  {
+    command: 'drop',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'drop v1'
+  },
+  {
+    command: 'drop',
+    args: [ 'v1', 'v2', 'v3' ],
+    condition: null,
+    options: null,
+    input: 'drop v1 v2 v3'
+  },
+  {
+    command: 'drop',
+    args: null,
+    condition: 'var1>var2',
+    options: null,
+    input: 'drop if var1>var2'
+  },
+  {
+    command: 'keep',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'keep v1'
+  },
+  {
+    command: 'keep',
+    args: [ 'v1', 'v2', 'v3' ],
+    condition: null,
+    options: null,
+    input: 'keep v1 v2 v3'
+  },
+  {
+    command: 'keep',
+    args: null,
+    condition: 'var1>var2',
+    options: null,
+    input: 'keep if var1>var2'
   }
 ]
 

@@ -54,6 +54,22 @@ command ->
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeGenerate(parsed));
 	} %} |
+	replace {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeReplace(parsed));
+	} %} |
+	rename {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeRename(parsed));
+	} %} |
+	drop {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeDrop(parsed));
+	} %} |
+	keep {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeKeep(parsed));
+	} %} |
 
 	regression {% (data) => {
 		const { input, parsed } = data[0];
@@ -89,7 +105,7 @@ _use -> "u" | "us" | "use"
 
 summarize ->
 	_summarize __ condition  {% (data) => {
-		const [summ,_, cond] = data;
+		const [summ,, cond] = data;
 		const input = composeManyInputs(data);
 		const parsed = summ.parsed.concat(cond.parsed);
 		return simpleCompose(input, parsed);
@@ -132,7 +148,7 @@ _desc -> "d" | "de" | "des" | "desc" | "descr" | "descri" | "describ" | "describ
 
 mean ->
 	_mean __ condition  {% (data) => {
-		const [mean,_, cond] = data;
+		const [mean,, cond] = data;
 		const input = composeManyInputs(data);
 		const parsed = mean.parsed.concat(cond.parsed);
 		return simpleCompose(input, parsed);
@@ -144,10 +160,6 @@ _mean ->
 		const [, varArray] = data;
 		const input = composeManyInputs(data);
 		return simpleCompose(input, [varArray.parsed]);
-	}%} |
-	_me  {% (data) => {
-		const input = composeManyInputs(data);
-		return simpleCompose(input, [[]]);
 	}%}
 
 _me -> "mean"
@@ -164,7 +176,7 @@ _me -> "mean"
 
 generate ->
 	_generate __ condition {% (data) => {
-		const [gen,_, cond] = data;
+		const [gen,, cond] = data;
 		const input = composeManyInputs(data);
 		const parsed = gen.parsed.concat(cond.parsed);
 		return simpleCompose(input, parsed);
@@ -178,7 +190,94 @@ _generate ->
 		return simpleCompose(input, [varName.parsed, exp.parsed]);
 	} %}
 
-_gen -> "gen"
+_gen -> "g" | "ge" | "gen" | "gene" | "gener" | "genera" | "generat" | "generate"
+
+
+####### REPLACE #######
+
+replace ->
+	_replace __ condition {% (data) => {
+		const [gen,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = gen.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_replace {% id %}
+
+_replace ->
+	_rep __ var __ "=" __ exp {% (data) => {
+		const [,,varName,,,,exp] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varName.parsed, exp.parsed]);
+	} %}
+
+_rep -> "replace"
+
+
+####### RENAME #######
+
+rename ->
+	_rename __ var __ var {% (data) => {
+		const [,,var1,,var2] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [var1.parsed, var2.parsed]);
+	} %}
+
+_rename -> "ren" | "rena" | "renam" | "rename"
+
+
+####### DROP #######
+
+drop ->
+	_drop __ condition  {% (data) => {
+		const [drop,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = drop.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_drop {% id %} |
+	_dr __ condition  {% (data) => {
+		const [,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = [null, cond.parsed];
+		return simpleCompose(input, parsed);
+	} %}
+
+_drop ->
+	_dr multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	}%}
+
+_dr -> "drop"
+
+
+####### KEEP #######
+
+keep ->
+	_keep __ condition  {% (data) => {
+		const [keep,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = keep.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_keep {% id %} |
+	_ke __ condition  {% (data) => {
+		const [,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = [null, cond.parsed];
+		return simpleCompose(input, parsed);
+	} %}
+
+_keep ->
+	_ke multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	}%}
+
+_ke -> "keep"
 
 
 
@@ -190,7 +289,7 @@ _gen -> "gen"
 # pipe since regression can happen either with or w/o an if condition
 regression ->
 	_regression __ condition {% (data) => {
-		const [reg,_, cond] = data;
+		const [reg,, cond] = data;
 		const input = composeManyInputs(data);
 		const parsed = reg.parsed.concat(cond.parsed);
 		return simpleCompose(input, parsed);
@@ -287,11 +386,25 @@ function composeGenerate([varname, exp, condition]) {
 	return composeParsed('generate', [varname, exp], condition);
 }
 
+function composeReplace([varname, exp, condition]) {
+	return composeParsed('replace', [varname, exp], condition);
+}
+
+function composeDrop([vars, condition]) {
+	return composeParsed('drop', vars, condition);
+}
+
+function composeKeep([vars, condition]) {
+	return composeParsed('keep', vars, condition);
+}
 
 function composeRegression([yvar, xArray, condition]) {
 	return composeParsed('regress', [yvar, xArray], condition);
 }
 
+function composeRename(vars) {
+	return composeParsed('rename', vars);
+}
 
 // replaces a few stata syntax things to python
 function cleanExpression(string) {
