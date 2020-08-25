@@ -11,9 +11,23 @@ const app = express();
 
 // additional init stuff should go before hitting the routing
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/platform_db';
-mongoose.connect(mongoURI);
-// set mongoose promises to es6 default
-mongoose.Promise = global.Promise;
+
+// copied from a private project I'm a part of
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  loggerLevel: 'error',
+};
+// Connect the database
+mongoose.connect(mongoURI, mongooseOptions).then(() => {
+  mongoose.Promise = global.Promise; // configures mongoose to use ES6 Promises
+  mongoose.set('useFindAndModify', false);
+  console.log('Connected to Database');
+  console.log(mongoURI);
+}).catch((err) => {
+  console.log('Not Connected to Database ERROR!  ', err);
+});
 
 // enable/disable cross origin resource sharing if necessary
 app.use(cors());

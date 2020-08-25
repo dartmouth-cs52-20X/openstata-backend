@@ -1,0 +1,13 @@
+clear
+use https://github.com/arjunsrini/open-stata-data/blob/master/cpsmar08_10pct.dta?raw=true
+summ
+mean age
+gen age2 = age^2
+mean age age2
+reg wage_hr hhid age age2
+rename age2 age_squared
+mean age_squared
+keep age age_squared
+summ
+drop age_sqaured
+mean age_squared
