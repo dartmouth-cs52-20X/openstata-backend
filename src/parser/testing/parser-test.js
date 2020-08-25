@@ -21,10 +21,9 @@ process.argv.slice(3).forEach((arg) => {
     parser.feed(data);
     const { results } = parser;
     console.log(`number of results: ${results.length}`);
-    console.log('processed/regenerated input:');
-    console.log(results[0].input);
-    console.log('parsed python output:');
-    console.dir(results[0].parsed, { depth: null });
+    console.log('parsed AST with regenerated inputs');
+    // console.dir(results[0], { depth: null });
+    console.log(JSON.stringify(results[0]));
     console.log();
     return 0;
   } catch (error) {

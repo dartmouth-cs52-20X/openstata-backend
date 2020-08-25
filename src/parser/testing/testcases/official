@@ -1,0 +1,43 @@
+clear
+
+use "arjun.dta"
+use arjun.dta
+use arjun
+use folder/arjun
+
+use "url.csv"
+use "url.xlsx"
+use "url.dta"
+
+su
+su var1
+su var1 var2
+su var1 var2 if var3>10
+
+d
+d var1
+d var1 var2
+
+mean var1
+mean var1 var2
+mean var1 var2 if var3>10
+
+
+gen var1 = 10
+gen var1 = var2 + var3
+gen var1 = var2 if var3>10
+
+replace var1 = 10
+replace var1 = var2 + var3
+replace var1 = var2 if var3>10
+
+rename oldname newname
+
+drop v1
+drop v1 v2 v3
+drop if var1>var2
+
+keep v1
+keep v1 v2 v3
+keep if var1>var2
+
