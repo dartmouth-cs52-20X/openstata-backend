@@ -12,6 +12,6 @@ const LogFileSchema = new Schema({
 });
 
 // create PostModel class from schema
-const LogFileModel = mongoose.model('DoFile', LogFileSchema);
+const LogFileModel = mongoose.model('LogFile', LogFileSchema);
 
 export default LogFileModel;

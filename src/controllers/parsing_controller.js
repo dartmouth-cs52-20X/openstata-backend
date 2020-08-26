@@ -1,4 +1,3 @@
-// import axios from 'axios';
 import nearley from 'nearley';
 import rawGrammar from '../parser';
 

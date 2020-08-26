@@ -1,7 +1,7 @@
 import Data from '../models/data_model';
 
-export const getDataFromName = async (fileName) => {
-  return Data.findOne({ fileName });
+export const getDataFile = async (fileName, user) => {
+  return Data.findOne({ fileName, $or: [{ user }, { user: null }] });
 };
 
 export const insertData = async (data) => {
@@ -15,19 +15,25 @@ export const getDataFiles = async () => {
 };
 
 // replace all virtual filenames with their real URLs
-export const insertAllUrls = async (parsedOutput) => {
+export const insertAllUrls = async (parsedOutput, userID) => {
   try {
     const response = await Promise.all(parsedOutput.map(async (object) => {
       const newObj = { ...object };
       if (object.command === 'use') {
-        // get rid of quotes if they exist
-        let filename = object.args[0];
-        if (/^".*"$/.test(filename)) filename = filename.slice(1, -1);
+        const filename = object.args[0];
         // search the file
-        const data = await getDataFromName(filename);
+        const data = await getDataFile(filename, userID);
         if (!data) throw new Error(`${filename} not found`);
         // add the real URL in
         newObj.args.unshift(data.url);
+      }
+      if (object.command === 'merge') {
+        const filename = object.args[2];
+        // search the file
+        const data = await getDataFile(filename, userID);
+        if (!data) throw new Error(`${filename} not found`);
+        // add the real URL in
+        newObj.args.splice(2, 0, data.url);
       }
       return newObj;
     }));

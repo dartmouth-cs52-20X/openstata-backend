@@ -22,6 +22,11 @@ mean var1
 mean var1 var2
 mean var1 var2 if var3>10
 
+log using fname
+log using "fname.log"
+log using fname, replace
+log close	
+capture log close
 
 gen var1 = 10
 gen var1 = var2 + var3
@@ -41,3 +46,29 @@ keep v1
 keep v1 v2 v3
 keep if var1>var2
 
+tab var1
+tab var1 if var3>10
+tab var1 var2
+tab var1 var2 if var3>10
+tab va1, gen(newvarname)
+
+merge 1:1 v1 using fname
+merge m:1 v1 using fname
+merge 1:m v1 using fname
+
+merge 1:1 v1 v2 v3 using fname
+merge m:1 v1 v2 v3 using fname
+merge 1:m v1 v2 v3 using fname
+
+reg y x
+reg y x1 x2 x3
+reg y x1 x2 x3 if x4>10
+reg y x1 x2 x3 if x4>10, robust
+reg y x1 x3 x3 if x4>10, cluster(var1)
+
+predict newvar
+predict newvar, xb
+predict newvar, resid
+
+test v1
+test v1 v2
