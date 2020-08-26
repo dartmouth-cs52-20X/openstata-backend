@@ -41,3 +41,13 @@ keep v1
 keep v1 v2 v3
 keep if var1>var2
 
+merge 1:1 v1 using fname
+merge m:1 v1 using fname
+merge 1:m v1 using fname
+
+merge 1:1 v1 v2 v3 using fname
+merge m:1 v1 v2 v3 using fname
+merge 1:m v1 v2 v3 using fname
+
+test v1
+test v1 v2

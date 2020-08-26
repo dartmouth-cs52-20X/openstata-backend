@@ -63,13 +63,21 @@ command ->
 		return simpleCompose(input, composeKeep(parsed));
 	} %} |
 
+	merge {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeMerge(parsed));
+	} %} |
 	regression {% (data) => {
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeRegression(parsed));
 	} %} |
 
+	test {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeTest(parsed));
+	} %} |
 
-	"test" # more rules can just be tacked on with a pipe char
+	"asdf" # more rules can just be tacked on with a pipe char
 
 
 
@@ -82,13 +90,11 @@ clear -> "clear" {% id %}
 ####### USE #######
 
 use ->
-	_use __ url {% (data) => {
-		const url = data[2]
+	_use __ fname {% (data) => {
+		const fname = data[2]
 		const input = composeManyInputs(data);
-		return simpleCompose(input, [url]);
+		return simpleCompose(input, [fname]);
 	} %}
-
-url -> [\S]:+ {% (data) => data[0].join('') %}
 
 _use -> "u" | "us" | "use"
 
@@ -273,7 +279,32 @@ _ke -> "keep"
 
 
 
+####### MERGE #######
 
+merge ->
+	_merge __ "using" __ fname {% (data) => {
+		const [merge,,using,,fname] = data;
+		const input = composeManyInputs(data);
+		const parsed = merge.parsed.concat(fname);
+		return simpleCompose(input, parsed);
+	} %}
+
+_merge ->
+	_mer multivar {% (data) => {
+		const [merge, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [merge.parsed, varArray.parsed]);
+	} %}
+
+_mer ->
+	"merge" __ _rel {% (data) => {
+		const [,, rel] = data;
+		const input = composeManyInputs(data);
+		const parsed = rel[0];
+		return simpleCompose(input, parsed);
+	} %}
+
+_rel -> "1:1" | "1:m" | "m:1"
 
 
 ####### REGRESS #######
@@ -302,6 +333,18 @@ _reg -> "reg"
 
 
 
+####### TEST #######
+
+test ->
+	_test multivar {% (data) => {
+		const [, varArray] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [varArray.parsed]);
+	} %}
+
+_test -> "te" | "tes" | "test"
+
+
 
 ####### BASIC SYNTAX #######
 
@@ -318,9 +361,12 @@ multivar -> (__ var):+ null {% (data) => {
 # single var
 var -> [\w]:+ {% (data, _, reject) => {
 	const input = data[0].join('');
-	if (input === 'if') return reject;
+	if (input === 'if' || input === "using") return reject;
 	return simpleCompose(input, input);
 }%}
+
+# filename: a bit more lenient than var
+fname -> [\S]:+ {% (data) => data[0].join('') %}
 
 # if statement's form
 condition -> "if" __ exp {% (data) => {
@@ -382,6 +428,10 @@ function composeReplace([varname, exp, condition]) {
 	return composeParsed('replace', [varname, exp], condition);
 }
 
+function composeRename(vars) {
+	return composeParsed('rename', vars);
+}
+
 function composeDrop([vars, condition]) {
 	return composeParsed('drop', vars, condition);
 }
@@ -390,12 +440,18 @@ function composeKeep([vars, condition]) {
 	return composeParsed('keep', vars, condition);
 }
 
+
+function composeMerge(args) {
+	return composeParsed('merge', args);
+}
+
 function composeRegression([yvar, xArray, condition]) {
 	return composeParsed('regress', [yvar, xArray], condition);
 }
 
-function composeRename(vars) {
-	return composeParsed('rename', vars);
+
+function composeTest([vars]) {
+	return composeParsed('test', vars);
 }
 
 // replaces a few stata syntax things to python

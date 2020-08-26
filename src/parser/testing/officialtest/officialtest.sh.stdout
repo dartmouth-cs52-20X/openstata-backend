@@ -45,6 +45,16 @@ keep v1
 keep v1 v2 v3
 keep if var1>var2
 
+merge 1:1 v1 using fname
+merge m:1 v1 using fname
+merge 1:m v1 using fname
+
+merge 1:1 v1 v2 v3 using fname
+merge m:1 v1 v2 v3 using fname
+merge 1:m v1 v2 v3 using fname
+
+test v1
+test v1 v2
 
 number of results: 1
 parsed AST with regenerated inputs
@@ -265,6 +275,62 @@ parsed AST with regenerated inputs
     condition: 'var1>var2',
     options: null,
     input: 'keep if var1>var2'
+  },
+  {
+    command: 'merge',
+    args: [ '1:1', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:1 v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ 'm:1', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge m:1 v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:m', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:m v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:1', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:1 v1 v2 v3 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ 'm:1', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge m:1 v1 v2 v3 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:m', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:m v1 v2 v3 using fname'
+  },
+  {
+    command: 'test',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'test v1'
+  },
+  {
+    command: 'test',
+    args: [ 'v1', 'v2' ],
+    condition: null,
+    options: null,
+    input: 'test v1 v2'
   }
 ]
 
