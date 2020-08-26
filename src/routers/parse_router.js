@@ -4,6 +4,7 @@ import { optionalAuth } from '../services/passport';
 import * as Parser from '../controllers/parsing_controller';
 import * as DataController from '../controllers/data_controller';
 import * as StataController from '../controllers/stata_controller';
+import * as LogFileController from '../controllers/logfile_controller';
 
 const router = Router();
 
@@ -14,21 +15,24 @@ router.route('/')
     const userID = req.user ? req.user._id : null;
     try {
       const parsed = Parser.parseStata(dofile);
-      const [err, fixedParsed] = await DataController.insertAllUrls(parsed, userID);
+      const [parseErr, fixedParsed] = await DataController.insertAllUrls(parsed, userID);
       // URL replacement error
-      if (err) {
-        console.log(err);
-        res.status(400).json({ error: err.message });
+      if (parseErr) {
+        console.log(parseErr);
+        res.status(400).json({ error: parseErr.message });
         return;
       }
-      const [error, response] = await StataController.execute(fixedParsed);
+      const [runErr, response] = await StataController.execute(fixedParsed);
       // some runtime error
-      if (error) {
-        console.log(error);
-        res.status(400).json({ error: error.message });
+      if (runErr) {
+        console.log(runErr);
+        res.status(400).json({ error: runErr.message });
         return;
       }
-      res.json(response.data);
+      const { logfiles, output } = response.data;
+      LogFileController.saveLogFiles(logfiles);
+      // tba comments
+      res.json({ output });
     } catch (error) {
       // parsing error
       console.log(error);
@@ -66,7 +70,7 @@ router.route('/test')
         res.status(400).json({ error: err.message });
         return;
       }
-      res.json({ parsed: fixedParsed });
+      res.json({ dofile: fixedParsed });
     } catch (error) {
       // parsing error
       console.log(error);

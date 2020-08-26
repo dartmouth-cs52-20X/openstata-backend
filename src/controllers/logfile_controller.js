@@ -50,3 +50,15 @@ export const deleteLogFile = (req, res) => {
       res.status(500).json({ error });
     });
 };
+
+export const saveLogFiles = (logfiles, userID) => {
+  try {
+    Object.entries(logfiles).forEach(([fileName, content]) => {
+      console.log({ fileName, content });
+      // await
+    });
+    return null;
+  } catch (error) {
+    return [error];
+  }
+};
