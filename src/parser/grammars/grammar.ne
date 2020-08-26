@@ -41,7 +41,14 @@ command ->
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeMean(parsed));
 	} %} |
-
+	log {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeLog(parsed));
+	} %} |
+	caplogclose {% (data) => {
+		const input = composeManyInputs(data[0]);
+		return simpleCompose(input, composeCapLogClose());
+	} %} |
 	generate {% (data) => {
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeGenerate(parsed));
@@ -182,11 +189,37 @@ _mean ->
 _me -> "mean"
 
 
+####### LOG #######
 
+log ->
+	_log _ "," _ logopts {% (data) => {
+		const [log,,,,options] = data;
+		const input = composeManyInputs(data);
+		const parsed = log.parsed
+		parsed.push([options.parsed]);
+		return simpleCompose(input, parsed);
+	} %} |
+	_log {% id %}
+	|
+	"log" __ "close" {% (data) => {
+		const input = composeManyInputs(data);
+		const parsed = ['close'];
+		return simpleCompose(input, [parsed]);
+	} %}
 
+_log ->
+	"log" __ "using" __ fname {% (data) => {
+		const fname = data[4];
+		const input = composeManyInputs(data);
+		const parsed = ['using', fname];
+		return simpleCompose(input, [parsed]);
+	} %}
 
+logopts -> option["replace"] {% id %}
 
+# capture log
 
+caplogclose -> "capture" __ "log" __ "close"
 
 
 ####### GENERATE #######
@@ -475,6 +508,13 @@ function composeMean([vars, condition]) {
 	return composeParsed('mean', vars, condition);
 }
 
+function composeLog([args, options]) {
+	return composeParsed('log', args, null, options);
+}
+
+function composeCapLogClose() {
+	return composeParsed('capture log close');
+}
 
 function composeGenerate([varname, exp, condition]) {
 	return composeParsed('generate', [varname, exp], condition);

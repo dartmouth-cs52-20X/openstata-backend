@@ -24,6 +24,13 @@ function composeMean([vars, condition]) {
 	return composeParsed('mean', vars, condition);
 }
 
+function composeLog([args, options]) {
+	return composeParsed('log', args, null, options);
+}
+
+function composeCapLogClose() {
+	return composeParsed('capture log close');
+}
 
 function composeGenerate([varname, exp, condition]) {
 	return composeParsed('generate', [varname, exp], condition);
@@ -165,6 +172,14 @@ var grammar = {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeMean(parsed));
         } },
+    {"name": "command", "symbols": ["log"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeLog(parsed));
+        } },
+    {"name": "command", "symbols": ["caplogclose"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data[0]);
+        	return simpleCompose(input, composeCapLogClose());
+        } },
     {"name": "command", "symbols": ["generate"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeGenerate(parsed));
@@ -287,6 +302,41 @@ var grammar = {
         }},
     {"name": "_me$string$1", "symbols": [{"literal":"m"}, {"literal":"e"}, {"literal":"a"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_me", "symbols": ["_me$string$1"]},
+    {"name": "log", "symbols": ["_log", "_", {"literal":","}, "_", "logopts"], "postprocess":  (data) => {
+        	const [log,,,,options] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = log.parsed
+        	parsed.push([options.parsed]);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "log", "symbols": ["_log"], "postprocess": id},
+    {"name": "log$string$1", "symbols": [{"literal":"l"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "log$string$2", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"o"}, {"literal":"s"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "log", "symbols": ["log$string$1", "__", "log$string$2"], "postprocess":  (data) => {
+        	const input = composeManyInputs(data);
+        	const parsed = ['close'];
+        	return simpleCompose(input, [parsed]);
+        } },
+    {"name": "_log$string$1", "symbols": [{"literal":"l"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_log$string$2", "symbols": [{"literal":"u"}, {"literal":"s"}, {"literal":"i"}, {"literal":"n"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_log", "symbols": ["_log$string$1", "__", "_log$string$2", "__", "fname"], "postprocess":  (data) => {
+        	const fname = data[4];
+        	const input = composeManyInputs(data);
+        	const parsed = ['using', fname];
+        	return simpleCompose(input, [parsed]);
+        } },
+    {"name": "logopts$macrocall$2$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "logopts$macrocall$2", "symbols": ["logopts$macrocall$2$string$1"]},
+    {"name": "logopts$macrocall$1", "symbols": ["logopts$macrocall$2"], "postprocess":  (data) => {
+        	const [opt] = data;
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(option, { option, arg: null });
+        } },
+    {"name": "logopts", "symbols": ["logopts$macrocall$1"], "postprocess": id},
+    {"name": "caplogclose$string$1", "symbols": [{"literal":"c"}, {"literal":"a"}, {"literal":"p"}, {"literal":"t"}, {"literal":"u"}, {"literal":"r"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "caplogclose$string$2", "symbols": [{"literal":"l"}, {"literal":"o"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "caplogclose$string$3", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"o"}, {"literal":"s"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "caplogclose", "symbols": ["caplogclose$string$1", "__", "caplogclose$string$2", "__", "caplogclose$string$3"]},
     {"name": "generate", "symbols": ["_generate", "__", "condition"], "postprocess":  (data) => {
         	const [gen,, cond] = data;
         	const input = composeManyInputs(data);

@@ -26,6 +26,12 @@ mean var1
 mean var1 var2
 mean var1 var2 if var3>10
 
+log using fname
+log using "fname.log"
+log using fname, replace
+log close	
+capture log close
+
 
 gen var1 = 10
 gen var1 = var2 + var3
@@ -194,6 +200,41 @@ parsed AST with regenerated inputs
     condition: 'var3>10',
     options: null,
     input: 'mean var1 var2 if var3>10'
+  },
+  {
+    command: 'log',
+    args: [ 'using', 'fname' ],
+    condition: null,
+    options: null,
+    input: 'log using fname'
+  },
+  {
+    command: 'log',
+    args: [ 'using', '"fname.log"' ],
+    condition: null,
+    options: null,
+    input: 'log using "fname.log"'
+  },
+  {
+    command: 'log',
+    args: [ 'using', 'fname' ],
+    condition: null,
+    options: [ { option: 'replace', arg: null } ],
+    input: 'log using fname, replace'
+  },
+  {
+    command: 'log',
+    args: [ 'close' ],
+    condition: null,
+    options: null,
+    input: 'log close'
+  },
+  {
+    command: 'capture log close',
+    args: null,
+    condition: null,
+    options: null,
+    input: 'capture log close'
   },
   {
     command: 'generate',
