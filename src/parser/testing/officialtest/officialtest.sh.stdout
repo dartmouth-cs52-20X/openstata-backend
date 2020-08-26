@@ -89,7 +89,7 @@ parsed AST with regenerated inputs
   },
   {
     command: 'use',
-    args: [ '"arjun.dta"' ],
+    args: [ 'arjun.dta' ],
     condition: null,
     options: null,
     input: 'use "arjun.dta"'
@@ -117,21 +117,21 @@ parsed AST with regenerated inputs
   },
   {
     command: 'use',
-    args: [ '"url.csv"' ],
+    args: [ 'url.csv' ],
     condition: null,
     options: null,
     input: 'use "url.csv"'
   },
   {
     command: 'use',
-    args: [ '"url.xlsx"' ],
+    args: [ 'url.xlsx' ],
     condition: null,
     options: null,
     input: 'use "url.xlsx"'
   },
   {
     command: 'use',
-    args: [ '"url.dta"' ],
+    args: [ 'url.dta' ],
     condition: null,
     options: null,
     input: 'use "url.dta"'
@@ -215,7 +215,7 @@ parsed AST with regenerated inputs
   },
   {
     command: 'log',
-    args: [ 'using', '"fname.log"' ],
+    args: [ 'using', 'fname.log' ],
     condition: null,
     options: null,
     input: 'log using "fname.log"'

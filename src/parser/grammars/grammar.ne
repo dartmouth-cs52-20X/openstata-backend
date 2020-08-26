@@ -122,7 +122,7 @@ use ->
 	_use __ fname {% (data) => {
 		const fname = data[2]
 		const input = composeManyInputs(data);
-		return simpleCompose(input, [fname]);
+		return simpleCompose(input, [fname.parsed]);
 	} %}
 
 _use -> "u" | "us" | "use"
@@ -214,7 +214,7 @@ _log ->
 	"log" __ "using" __ fname {% (data) => {
 		const fname = data[4];
 		const input = composeManyInputs(data);
-		const parsed = ['using', fname];
+		const parsed = ['using', fname.parsed];
 		return simpleCompose(input, [parsed]);
 	} %}
 
@@ -385,7 +385,7 @@ merge ->
 	_merge __ "using" __ fname {% (data) => {
 		const [merge,,using,,fname] = data;
 		const input = composeManyInputs(data);
-		const parsed = merge.parsed.concat(fname);
+		const parsed = merge.parsed.concat(fname.parsed);
 		return simpleCompose(input, parsed);
 	} %}
 
@@ -503,7 +503,11 @@ var -> [\w]:+ {% (data, _, reject) => {
 }%}
 
 # filename: a bit more lenient than var
-fname -> [\S]:+ {% (data) => data[0].join('') %}
+fname -> [\S]:+ {% (data) => {
+	const input = data[0].join('');
+	const parsed = /^".*"$/.test(input) ? input.slice(1, -1) : input;
+	return simpleCompose(input, parsed);
+} %}
 
 # if statement's form
 condition -> "if" __ exp {% (data) => {

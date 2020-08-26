@@ -230,7 +230,7 @@ var grammar = {
     {"name": "use", "symbols": ["_use", "__", "fname"], "postprocess":  (data) => {
         	const fname = data[2]
         	const input = composeManyInputs(data);
-        	return simpleCompose(input, [fname]);
+        	return simpleCompose(input, [fname.parsed]);
         } },
     {"name": "_use", "symbols": [{"literal":"u"}]},
     {"name": "_use$string$1", "symbols": [{"literal":"u"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
@@ -329,7 +329,7 @@ var grammar = {
     {"name": "_log", "symbols": ["_log$string$1", "__", "_log$string$2", "__", "fname"], "postprocess":  (data) => {
         	const fname = data[4];
         	const input = composeManyInputs(data);
-        	const parsed = ['using', fname];
+        	const parsed = ['using', fname.parsed];
         	return simpleCompose(input, [parsed]);
         } },
     {"name": "logopts$macrocall$2$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"p"}, {"literal":"l"}, {"literal":"a"}, {"literal":"c"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
@@ -491,7 +491,7 @@ var grammar = {
     {"name": "merge", "symbols": ["_merge", "__", "merge$string$1", "__", "fname"], "postprocess":  (data) => {
         	const [merge,,using,,fname] = data;
         	const input = composeManyInputs(data);
-        	const parsed = merge.parsed.concat(fname);
+        	const parsed = merge.parsed.concat(fname.parsed);
         	return simpleCompose(input, parsed);
         } },
     {"name": "_merge", "symbols": ["_mer", "multivar"], "postprocess":  (data) => {
@@ -637,7 +637,11 @@ var grammar = {
         }},
     {"name": "fname$ebnf$1", "symbols": [/[\S]/]},
     {"name": "fname$ebnf$1", "symbols": ["fname$ebnf$1", /[\S]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "fname", "symbols": ["fname$ebnf$1"], "postprocess": (data) => data[0].join('')},
+    {"name": "fname", "symbols": ["fname$ebnf$1"], "postprocess":  (data) => {
+        	const input = data[0].join('');
+        	const parsed = /^".*"$/.test(input) ? input.slice(1, -1) : input;
+        	return simpleCompose(input, parsed);
+        } },
     {"name": "condition$string$1", "symbols": [{"literal":"i"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "condition", "symbols": ["condition$string$1", "__", "exp"], "postprocess":  (data) => {
         	const input = data[0] + data[1].input + data[2].input;

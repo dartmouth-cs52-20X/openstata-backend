@@ -60,3 +60,8 @@ passport.use(localLogin);
 
 export const requireAuth = passport.authenticate('jwt', { session: false });
 export const requireSignin = passport.authenticate('local', { session: false });
+
+export const optionalAuth = async (req, res, next) => {
+  if (req.headers.authorization) requireAuth(req, res, next);
+  else next();
+};

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 const DataSchema = new Schema({
-  fileName: { type: String, unique: true, required: true },
+  fileName: { type: String, index: true, required: true },
   url: { type: String, required: true },
   user: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 }, {

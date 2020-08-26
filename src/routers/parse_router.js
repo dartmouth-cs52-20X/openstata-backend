@@ -1,6 +1,6 @@
 import { Router } from 'express';
 // will add this later
-// import { requireAuth } from './services/passport';
+import { optionalAuth } from '../services/passport';
 import * as Parser from '../controllers/parsing_controller';
 import * as DataController from '../controllers/data_controller';
 import * as StataController from '../controllers/stata_controller';
@@ -9,11 +9,12 @@ const router = Router();
 
 // handle parsing and execution
 router.route('/')
-  .post(async (req, res) => {
+  .post(optionalAuth, async (req, res) => {
     const { dofile } = req.body;
+    const userID = req.user ? req.user._id : null;
     try {
       const parsed = Parser.parseStata(dofile);
-      const [err, fixedParsed] = await DataController.insertAllUrls(parsed);
+      const [err, fixedParsed] = await DataController.insertAllUrls(parsed, userID);
       // URL replacement error
       if (err) {
         console.log(err);
