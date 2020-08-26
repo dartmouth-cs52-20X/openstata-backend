@@ -50,10 +50,13 @@ function composeMerge(args) {
 	return composeParsed('merge', args);
 }
 
-function composeRegression([yvar, xArray, condition]) {
-	return composeParsed('regress', [yvar, xArray], condition);
+function composeRegression([yvar, xArray, condition, options]) {
+	return composeParsed('regress', [yvar, xArray], condition, options);
 }
 
+function composePredict([vars, options]) {
+	return composeParsed('predict', vars, null, options);
+}
 
 function composeTest([vars]) {
 	return composeParsed('test', vars);
@@ -189,6 +192,10 @@ var grammar = {
     {"name": "command", "symbols": ["regression"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeRegression(parsed));
+        } },
+    {"name": "command", "symbols": ["predict"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composePredict(parsed));
         } },
     {"name": "command", "symbols": ["test"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
@@ -399,14 +406,24 @@ var grammar = {
     {"name": "_rel", "symbols": ["_rel$string$2"]},
     {"name": "_rel$string$3", "symbols": [{"literal":"m"}, {"literal":":"}, {"literal":"1"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_rel", "symbols": ["_rel$string$3"]},
-    {"name": "regression", "symbols": ["_regression", "__", "condition"], "postprocess":  (data) => {
+    {"name": "regression", "symbols": ["_regression", "_", {"literal":","}, "_", "regopts"], "postprocess":  (data) => {
+        	const [reg,,,,options] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = reg.parsed;
+        	// needed to ensure that options hit parsed[3]
+        	if (parsed.length < 3) parsed.push(null);
+        	parsed.push([options.parsed]);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "regression", "symbols": ["_regression"], "postprocess": id},
+    {"name": "_regression", "symbols": ["_regress", "__", "condition"], "postprocess":  (data) => {
         	const [reg,, cond] = data;
         	const input = composeManyInputs(data);
         	const parsed = reg.parsed.concat(cond.parsed);
         	return simpleCompose(input, parsed);
         } },
-    {"name": "regression", "symbols": ["_regression"], "postprocess": id},
-    {"name": "_regression", "symbols": ["_reg", "__", "var", "multivar"], "postprocess":  (data) => {
+    {"name": "_regression", "symbols": ["_regress"], "postprocess": id},
+    {"name": "_regress", "symbols": ["_reg", "__", "var", "multivar"], "postprocess":  (data) => {
         	const [,, yvar, xArray] = data;
         	const input = composeManyInputs(data);
         	const parsed = [yvar.parsed, xArray.parsed];
@@ -414,6 +431,74 @@ var grammar = {
         }},
     {"name": "_reg$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_reg", "symbols": ["_reg$string$1"]},
+    {"name": "_reg$string$2", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_reg", "symbols": ["_reg$string$2"]},
+    {"name": "_reg$string$3", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}, {"literal":"r"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_reg", "symbols": ["_reg$string$3"]},
+    {"name": "_reg$string$4", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}, {"literal":"r"}, {"literal":"e"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_reg", "symbols": ["_reg$string$4"]},
+    {"name": "_reg$string$5", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"g"}, {"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_reg", "symbols": ["_reg$string$5"]},
+    {"name": "regopts$macrocall$2$string$1", "symbols": [{"literal":"r"}, {"literal":"o"}, {"literal":"b"}, {"literal":"u"}, {"literal":"s"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "regopts$macrocall$2", "symbols": ["regopts$macrocall$2$string$1"]},
+    {"name": "regopts$macrocall$1", "symbols": ["regopts$macrocall$2"], "postprocess":  (data) => {
+        	const [opt] = data;
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(option, { option, arg: null });
+        } },
+    {"name": "regopts", "symbols": ["regopts$macrocall$1"], "postprocess": id},
+    {"name": "regopts$macrocall$4$string$1", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"u"}, {"literal":"s"}, {"literal":"t"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "regopts$macrocall$4", "symbols": ["regopts$macrocall$4$string$1"]},
+    {"name": "regopts$macrocall$3", "symbols": ["regopts$macrocall$4", {"literal":"("}, "_", "var", "_", {"literal":")"}], "postprocess":  (data) => {
+        	const [opt,,,argument] = data;
+        	const input = composeManyInputs(data);
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(input, { option, arg: argument.parsed });
+        } },
+    {"name": "regopts", "symbols": ["regopts$macrocall$3"], "postprocess": id},
+    {"name": "predict", "symbols": ["_predict", "_", {"literal":","}, "_", "predictopts"], "postprocess":  (data) => {
+        	const [predict,,,,options] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = [predict.parsed]
+        	parsed.push([options.parsed]);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "predict", "symbols": ["_predict"], "postprocess": id},
+    {"name": "_predict$string$1", "symbols": [{"literal":"p"}, {"literal":"r"}, {"literal":"e"}, {"literal":"d"}, {"literal":"i"}, {"literal":"c"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_predict", "symbols": ["_predict$string$1", "__", "var"], "postprocess":  (data) => {
+        	const [predict,,pvar] = data;
+        	const input = composeManyInputs(data);
+        	return simpleCompose(input, [pvar.parsed]);
+        } },
+    {"name": "predictopts$macrocall$2", "symbols": ["residual"]},
+    {"name": "predictopts$macrocall$1", "symbols": ["predictopts$macrocall$2"], "postprocess":  (data) => {
+        	const [opt] = data;
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(option, { option, arg: null });
+        } },
+    {"name": "predictopts", "symbols": ["predictopts$macrocall$1"], "postprocess": id},
+    {"name": "predictopts$macrocall$4$string$1", "symbols": [{"literal":"x"}, {"literal":"b"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "predictopts$macrocall$4", "symbols": ["predictopts$macrocall$4$string$1"]},
+    {"name": "predictopts$macrocall$3", "symbols": ["predictopts$macrocall$4"], "postprocess":  (data) => {
+        	const [opt] = data;
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(option, { option, arg: null });
+        } },
+    {"name": "predictopts", "symbols": ["predictopts$macrocall$3"], "postprocess": id},
+    {"name": "residual$string$1", "symbols": [{"literal":"r"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$1"]},
+    {"name": "residual$string$2", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$2"]},
+    {"name": "residual$string$3", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"i"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$3"]},
+    {"name": "residual$string$4", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"i"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$4"]},
+    {"name": "residual$string$5", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"i"}, {"literal":"d"}, {"literal":"u"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$5"]},
+    {"name": "residual$string$6", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"i"}, {"literal":"d"}, {"literal":"u"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$6"]},
+    {"name": "residual$string$7", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"s"}, {"literal":"i"}, {"literal":"d"}, {"literal":"u"}, {"literal":"a"}, {"literal":"l"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "residual", "symbols": ["residual$string$7"]},
     {"name": "test", "symbols": ["_test", "multivar"], "postprocess":  (data) => {
         	const [, varArray] = data;
         	const input = composeManyInputs(data);
@@ -465,7 +550,7 @@ var grammar = {
         	const input = term1.join('') + otherterms.map((termexp) => {
         		return termexp[0].input + termexp[1].join('');
         	}).join('');
-        	if (input.includes('if')) return reject;
+        	if (input.includes('if') || input.includes(',')) return reject;
         	return composeUsingFunction(input, cleanExpression);
         }},
     {"name": "_$ebnf$1", "symbols": []},

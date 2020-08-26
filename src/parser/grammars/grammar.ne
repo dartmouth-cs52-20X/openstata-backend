@@ -71,7 +71,10 @@ command ->
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeRegression(parsed));
 	} %} |
-
+	predict {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composePredict(parsed));
+	} %} |
 	test {% (data) => {
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeTest(parsed));
@@ -80,6 +83,22 @@ command ->
 	"asdf" # more rules can just be tacked on with a pipe char
 
 
+####### MACROS #######
+
+# name: the actual option name
+option[name] -> $name {% (data) => {
+	const [opt] = data;
+	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+	return simpleCompose(option, { option, arg: null });
+} %}
+
+# option w/ one var argument
+optionArgs[name] -> $name "(" _ var  _ ")" {% (data) => {
+	const [opt,,,argument] = data;
+	const input = composeManyInputs(data);
+	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+	return simpleCompose(input, { option, arg: argument.parsed });
+} %}
 
 
 ####### CLEAR #######
@@ -309,18 +328,31 @@ _rel -> "1:1" | "1:m" | "m:1"
 
 ####### REGRESS #######
 
-# pipe since regression can happen either with or w/o an if condition
+# accounts for opts or no opts
 regression ->
-	_regression __ condition {% (data) => {
+	_regression _ "," _ regopts {% (data) => {
+		const [reg,,,,options] = data;
+		const input = composeManyInputs(data);
+		const parsed = reg.parsed;
+		// needed to ensure that options hit parsed[3]
+		if (parsed.length < 3) parsed.push(null);
+		parsed.push([options.parsed]);
+		return simpleCompose(input, parsed);
+	} %} |
+	_regression {% id %}
+
+# conditional or no conditional
+_regression ->
+	_regress __ condition {% (data) => {
 		const [reg,, cond] = data;
 		const input = composeManyInputs(data);
 		const parsed = reg.parsed.concat(cond.parsed);
 		return simpleCompose(input, parsed);
 	} %} |
-	_regression {% id %}
+	_regress {% id %}
 
-# actual reg syntax here
-_regression ->
+# regular structure
+_regress ->
 	_reg __ var multivar {% (data) => {
 		const [,, yvar, xArray] = data;
 		const input = composeManyInputs(data);
@@ -328,9 +360,33 @@ _regression ->
 		return simpleCompose(input, parsed);
 	}%}
 
-_reg -> "reg"
+_reg -> "reg" | "regr" | "regre" | "regres" | "regress"
+
+regopts -> option["robust"] {% id %} | optionArgs["cluster"] {% id %}
 
 
+####### PREDICT ########
+
+predict ->
+	_predict _ "," _ predictopts {% (data) => {
+		const [predict,,,,options] = data;
+		const input = composeManyInputs(data);
+		const parsed = [predict.parsed]
+		parsed.push([options.parsed]);
+		return simpleCompose(input, parsed);
+	} %} |
+	_predict {% id %}
+
+_predict ->
+	"predict" __ var {% (data) => {
+		const [predict,,pvar] = data;
+		const input = composeManyInputs(data);
+		return simpleCompose(input, [pvar.parsed]);
+	} %}
+
+predictopts -> option[residual] {% id %} | option["xb"] {% id %}
+
+residual -> "re" | "res" | "resi" | "resid" | "residu" | "residua" | "residual"
 
 
 ####### TEST #######
@@ -381,7 +437,7 @@ exp -> [\S]:+ (__ [\S]:+):* {% (data, _, reject) => {
 	const input = term1.join('') + otherterms.map((termexp) => {
 		return termexp[0].input + termexp[1].join('');
 	}).join('');
-	if (input.includes('if')) return reject;
+	if (input.includes('if') || input.includes(',')) return reject;
 	return composeUsingFunction(input, cleanExpression);
 }%}
 
@@ -445,10 +501,13 @@ function composeMerge(args) {
 	return composeParsed('merge', args);
 }
 
-function composeRegression([yvar, xArray, condition]) {
-	return composeParsed('regress', [yvar, xArray], condition);
+function composeRegression([yvar, xArray, condition, options]) {
+	return composeParsed('regress', [yvar, xArray], condition, options);
 }
 
+function composePredict([vars, options]) {
+	return composeParsed('predict', vars, null, options);
+}
 
 function composeTest([vars]) {
 	return composeParsed('test', vars);

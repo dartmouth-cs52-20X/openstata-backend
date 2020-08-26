@@ -53,6 +53,16 @@ merge 1:1 v1 v2 v3 using fname
 merge m:1 v1 v2 v3 using fname
 merge 1:m v1 v2 v3 using fname
 
+reg y x
+reg y x1 x2 x3
+reg y x1 x2 x3 if x4>10
+reg y x1 x2 x3 if x4>10, robust
+reg y x1 x3 x3 if x4>10, cluster(var1)
+
+predict newvar
+predict newvar, xb
+predict newvar, resid
+
 test v1
 test v1 v2
 
@@ -317,6 +327,62 @@ parsed AST with regenerated inputs
     condition: null,
     options: null,
     input: 'merge 1:m v1 v2 v3 using fname'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x' ] ],
+    condition: null,
+    options: null,
+    input: 'reg y x'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: null,
+    options: null,
+    input: 'reg y x1 x2 x3'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: 'x4>10',
+    options: null,
+    input: 'reg y x1 x2 x3 if x4>10'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: 'x4>10',
+    options: [ { option: 'robust', arg: null } ],
+    input: 'reg y x1 x2 x3 if x4>10, robust'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x3', 'x3' ] ],
+    condition: 'x4>10',
+    options: [ { option: 'cluster', arg: 'var1' } ],
+    input: 'reg y x1 x3 x3 if x4>10, cluster(var1)'
+  },
+  {
+    command: 'predict',
+    args: 'newvar',
+    condition: null,
+    options: null,
+    input: 'predict newvar'
+  },
+  {
+    command: 'predict',
+    args: [ 'newvar' ],
+    condition: null,
+    options: [ { option: 'xb', arg: null } ],
+    input: 'predict newvar, xb'
+  },
+  {
+    command: 'predict',
+    args: [ 'newvar' ],
+    condition: null,
+    options: [ { option: 'resid', arg: null } ],
+    input: 'predict newvar, resid'
   },
   {
     command: 'test',
