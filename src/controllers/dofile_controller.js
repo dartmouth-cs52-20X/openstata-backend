@@ -9,7 +9,7 @@ export const createDoFile = (req, res) => {
   });
   dofile.save()
     .then((result) => {
-      res.json({ message: 'success' });
+      res.send(dofile._id);
     })
     .catch((error) => {
       res.status(500).json({ error });
