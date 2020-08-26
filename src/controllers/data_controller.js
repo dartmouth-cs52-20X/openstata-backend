@@ -1,7 +1,7 @@
 import Data from '../models/data_model';
 
 export const getDataFile = async (fileName, user) => {
-  return Data.findOne({ fileName, user });
+  return Data.findOne({ fileName, $or: [{ user }, { user: null }] });
 };
 
 export const insertData = async (data) => {

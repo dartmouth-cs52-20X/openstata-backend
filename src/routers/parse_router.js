@@ -41,9 +41,11 @@ router.route('/')
 
 // dummy route for us to add some sample datasets
 router.route('/add')
-  .post(async (req, res) => {
+  .post(optionalAuth, async (req, res) => {
     try {
+      const userID = req.user ? req.user._id : null;
       const data = req.body;
+      data.user = userID;
       const response = await DataController.insertData(data);
       res.json(response);
     } catch (error) {
