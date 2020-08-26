@@ -51,4 +51,27 @@ router.route('/add')
     }
   });
 
+router.route('/test')
+  .post(async (req, res) => {
+    try {
+      const { dofile } = req.body;
+      const parsed = Parser.parseStata(dofile);
+      const [err, fixedParsed] = await DataController.insertAllUrls(parsed);
+      // URL replacement error
+      if (err) {
+        console.log(err);
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({ parsed: fixedParsed });
+    } catch (error) {
+      // parsing error
+      console.log(error);
+      // gets rid of all the weird stuff
+      const pos = error.message.indexOf('Unexpected "');
+      const message = error.message.slice(0, pos - 1);
+      res.status(400).json({ error, message });
+    }
+  });
+
 export default router;
