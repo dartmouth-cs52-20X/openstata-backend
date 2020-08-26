@@ -66,7 +66,7 @@ router.route('/test')
         res.status(400).json({ error: err.message });
         return;
       }
-      res.json({ parsed: fixedParsed });
+      res.json({ dofile: fixedParsed });
     } catch (error) {
       // parsing error
       console.log(error);
