@@ -52,6 +52,9 @@ function composeKeep([vars, condition]) {
 	return composeParsed('keep', vars, condition);
 }
 
+function composeTabulate([vars, condition, options]) {
+	return composeParsed('tabulate', vars, condition, options);
+}
 
 function composeMerge(args) {
 	return composeParsed('merge', args);
@@ -199,6 +202,10 @@ var grammar = {
     {"name": "command", "symbols": ["keep"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeKeep(parsed));
+        } },
+    {"name": "command", "symbols": ["tabulate"], "postprocess":  (data) => {
+        	const { input, parsed } = data[0];
+        	return simpleCompose(input, composeTabulate(parsed));
         } },
     {"name": "command", "symbols": ["merge"], "postprocess":  (data) => {
         	const { input, parsed } = data[0];
@@ -349,21 +356,18 @@ var grammar = {
         	const input = composeManyInputs(data);
         	return simpleCompose(input, [varName.parsed, exp.parsed]);
         } },
-    {"name": "_gen", "symbols": [{"literal":"g"}]},
-    {"name": "_gen$string$1", "symbols": [{"literal":"g"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$1", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$1"]},
-    {"name": "_gen$string$2", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$2", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$2"]},
-    {"name": "_gen$string$3", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$3", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$3"]},
-    {"name": "_gen$string$4", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$4", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$4"]},
-    {"name": "_gen$string$5", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$5", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$5"]},
-    {"name": "_gen$string$6", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_gen$string$6", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_gen", "symbols": ["_gen$string$6"]},
-    {"name": "_gen$string$7", "symbols": [{"literal":"g"}, {"literal":"e"}, {"literal":"n"}, {"literal":"e"}, {"literal":"r"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "_gen", "symbols": ["_gen$string$7"]},
     {"name": "replace", "symbols": ["_replace", "__", "condition"], "postprocess":  (data) => {
         	const [gen,, cond] = data;
         	const input = composeManyInputs(data);
@@ -431,6 +435,58 @@ var grammar = {
         }},
     {"name": "_ke$string$1", "symbols": [{"literal":"k"}, {"literal":"e"}, {"literal":"e"}, {"literal":"p"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "_ke", "symbols": ["_ke$string$1"]},
+    {"name": "tabulate", "symbols": ["_tab1", "_", {"literal":","}, "_", "tabopts"], "postprocess":  (data) => {
+        	const [tab,,,,options] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = tab.parsed;
+        	// offet to not confuse with conditional
+        	parsed.push(null);
+        	parsed.push([options.parsed]);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "tabulate", "symbols": ["_tabulate", "__", "condition"], "postprocess":  (data) => {
+        	const [tab,, cond] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = tab.parsed.concat(cond.parsed);
+        	return simpleCompose(input, parsed);
+        } },
+    {"name": "tabulate", "symbols": ["_tabulate"], "postprocess": id},
+    {"name": "_tabulate", "symbols": ["_tab1"], "postprocess": id},
+    {"name": "_tabulate", "symbols": ["_tab2"], "postprocess": id},
+    {"name": "_tab1", "symbols": ["_tab", "__", "var"], "postprocess":  (data) => {
+        	const [tab,,var1] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = [var1.parsed];
+        	return simpleCompose(input, [parsed]);
+        } },
+    {"name": "_tab2", "symbols": ["_tab", "__", "var", "__", "var"], "postprocess":  (data) => {
+        	const [tab,,var1,,var2] = data;
+        	const input = composeManyInputs(data);
+        	const parsed = [var1.parsed, var2.parsed];
+        	return simpleCompose(input, [parsed]);
+        } },
+    {"name": "_tab$string$1", "symbols": [{"literal":"t"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$1"]},
+    {"name": "_tab$string$2", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$2"]},
+    {"name": "_tab$string$3", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}, {"literal":"u"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$3"]},
+    {"name": "_tab$string$4", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}, {"literal":"u"}, {"literal":"l"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$4"]},
+    {"name": "_tab$string$5", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}, {"literal":"u"}, {"literal":"l"}, {"literal":"a"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$5"]},
+    {"name": "_tab$string$6", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}, {"literal":"u"}, {"literal":"l"}, {"literal":"a"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$6"]},
+    {"name": "_tab$string$7", "symbols": [{"literal":"t"}, {"literal":"a"}, {"literal":"b"}, {"literal":"u"}, {"literal":"l"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "_tab", "symbols": ["_tab$string$7"]},
+    {"name": "tabopts$macrocall$2", "symbols": ["_gen"]},
+    {"name": "tabopts$macrocall$1", "symbols": ["tabopts$macrocall$2", {"literal":"("}, "_", "var", "_", {"literal":")"}], "postprocess":  (data) => {
+        	const [opt,,,argument] = data;
+        	const input = composeManyInputs(data);
+        	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
+        	return simpleCompose(input, { option, arg: argument.parsed });
+        } },
+    {"name": "tabopts", "symbols": ["tabopts$macrocall$1"], "postprocess": id},
     {"name": "merge$string$1", "symbols": [{"literal":"u"}, {"literal":"s"}, {"literal":"i"}, {"literal":"n"}, {"literal":"g"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "merge", "symbols": ["_merge", "__", "merge$string$1", "__", "fname"], "postprocess":  (data) => {
         	const [merge,,using,,fname] = data;

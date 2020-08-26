@@ -69,7 +69,10 @@ command ->
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeKeep(parsed));
 	} %} |
-
+	tabulate {% (data) => {
+		const { input, parsed } = data[0];
+		return simpleCompose(input, composeTabulate(parsed));
+	} %} |
 	merge {% (data) => {
 		const { input, parsed } = data[0];
 		return simpleCompose(input, composeMerge(parsed));
@@ -240,7 +243,7 @@ _generate ->
 		return simpleCompose(input, [varName.parsed, exp.parsed]);
 	} %}
 
-_gen -> "g" | "ge" | "gen" | "gene" | "gener" | "genera" | "generat" | "generate"
+_gen -> "gen" | "gene" | "gener" | "genera" | "generat" | "generate"
 
 
 ####### REPLACE #######
@@ -329,6 +332,51 @@ _keep ->
 
 _ke -> "keep"
 
+
+####### TABULATE #######
+
+tabulate ->
+	_tab1 _ "," _ tabopts {% (data) => {
+		const [tab,,,,options] = data;
+		const input = composeManyInputs(data);
+		const parsed = tab.parsed;
+		// offet to not confuse with conditional
+		parsed.push(null);
+		parsed.push([options.parsed]);
+		return simpleCompose(input, parsed);
+	} %} |
+	_tabulate __ condition {% (data) => {
+		const [tab,, cond] = data;
+		const input = composeManyInputs(data);
+		const parsed = tab.parsed.concat(cond.parsed);
+		return simpleCompose(input, parsed);
+	} %} |
+	_tabulate {% id %}
+
+_tabulate ->
+	_tab1 {% id %}
+	|
+	_tab2 {% id %}
+
+_tab1 ->
+	_tab __ var {% (data) => {
+		const [tab,,var1] = data;
+		const input = composeManyInputs(data);
+		const parsed = [var1.parsed];
+		return simpleCompose(input, [parsed]);
+	} %}
+
+_tab2 ->
+	_tab __ var __ var  {% (data) => {
+		const [tab,,var1,,var2] = data;
+		const input = composeManyInputs(data);
+		const parsed = [var1.parsed, var2.parsed];
+		return simpleCompose(input, [parsed]);
+	} %}
+
+_tab -> "ta" | "tab" | "tabu" | "tabul" | "tabula" | "tabulat" | "tabulate"
+
+tabopts -> optionArgs[_gen] {% id %}
 
 
 ####### MERGE #######
@@ -536,6 +584,9 @@ function composeKeep([vars, condition]) {
 	return composeParsed('keep', vars, condition);
 }
 
+function composeTabulate([vars, condition, options]) {
+	return composeParsed('tabulate', vars, condition, options);
+}
 
 function composeMerge(args) {
 	return composeParsed('merge', args);

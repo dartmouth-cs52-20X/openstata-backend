@@ -28,7 +28,6 @@ log using fname, replace
 log close	
 capture log close
 
-
 gen var1 = 10
 gen var1 = var2 + var3
 gen var1 = var2 if var3>10
@@ -46,6 +45,12 @@ drop if var1>var2
 keep v1
 keep v1 v2 v3
 keep if var1>var2
+
+tab var1
+tab var1 if var3>10
+tab var1 var2
+tab var1 var2 if var3>10
+tab va1, gen(newvarname)
 
 merge 1:1 v1 using fname
 merge m:1 v1 using fname
