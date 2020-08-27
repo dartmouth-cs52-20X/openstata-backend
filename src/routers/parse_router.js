@@ -19,19 +19,23 @@ router.route('/')
       // URL replacement error
       if (parseErr) {
         console.log(parseErr);
-        res.status(400).json({ error: parseErr.message });
+        res.status(400).json({ output: [parseErr.message] });
         return;
       }
       const [runErr, response] = await StataController.execute(fixedParsed);
       // some runtime error
       if (runErr) {
         console.log(runErr);
-        res.status(400).json({ error: runErr.message });
+        res.status(400).json({ output: [runErr.message] });
         return;
       }
       const { logfiles, output } = response.data;
-      LogFileController.saveLogFiles(logfiles);
-      // tba comments
+      const [logErr] = await LogFileController.saveLogFiles(logfiles, userID);
+      if (logErr) {
+        console.log(logErr);
+        res.status(400).json({ output: [logErr.message] });
+        return;
+      }
       res.json({ output });
     } catch (error) {
       // parsing error
@@ -39,7 +43,7 @@ router.route('/')
       // gets rid of all the weird stuff
       const pos = error.message.indexOf('Unexpected "');
       const message = error.message.slice(0, pos - 1);
-      res.status(400).json({ error, message });
+      res.status(400).json({ output: [message] });
     }
   });
 
