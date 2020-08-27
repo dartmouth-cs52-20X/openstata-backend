@@ -146,16 +146,22 @@ var grammar = {
     {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "program$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "program", "symbols": ["___b", "_", "command", "program$ebnf$1", "_", "___a"], "postprocess":  (data) => {
         	const [,,command, otherCommands] = data;
-        	const output = [command.parsed];
-        	output[0].input = command.input;
+        	const output = [];
+        	if (!command.comment) {
+        		output.push(command.parsed);
+        		output[0].input = command.input;
+        	}
         	otherCommands.map((commandSet) => commandSet[2])
         		.forEach((nextCommand) => {
-        			const newCommand = nextCommand.parsed;
-        			newCommand.input = nextCommand.input;
-        			output.push(newCommand);
+        			if (!nextCommand.comment) {
+        				const newCommand = nextCommand.parsed;
+        				newCommand.input = nextCommand.input;
+        				output.push(newCommand);
+        			}
         		});
         	return output;
         }},
+    {"name": "command", "symbols": ["comment"], "postprocess": id},
     {"name": "command", "symbols": ["clear"], "postprocess":  (data) => {
         	return simpleCompose(data[0], composeClear());
         } },
@@ -223,8 +229,12 @@ var grammar = {
         	const { input, parsed } = data[0];
         	return simpleCompose(input, composeTest(parsed));
         } },
-    {"name": "command$string$1", "symbols": [{"literal":"a"}, {"literal":"s"}, {"literal":"d"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "command$string$1", "symbols": [{"literal":"a"}, {"literal":"f"}, {"literal":"d"}, {"literal":"s"}, {"literal":"v"}, {"literal":"a"}, {"literal":"c"}, {"literal":"d"}, {"literal":"s"}, {"literal":"f"}, {"literal":"a"}, {"literal":"b"}, {"literal":"e"}, {"literal":"a"}, {"literal":"d"}, {"literal":"f"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "command", "symbols": ["command$string$1"]},
+    {"name": "comment$string$1", "symbols": [{"literal":"/"}, {"literal":"/"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "comment", "symbols": ["comment$string$1", "anyline"], "postprocess":  (data) => {
+        	return { comment: true };
+        } },
     {"name": "clear$string$1", "symbols": [{"literal":"c"}, {"literal":"l"}, {"literal":"e"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "clear", "symbols": ["clear$string$1"], "postprocess": id},
     {"name": "use", "symbols": ["_use", "__", "fname"], "postprocess":  (data) => {
@@ -662,6 +672,20 @@ var grammar = {
         	}).join('');
         	if (input.includes('if') || input.includes(',')) return reject;
         	return composeUsingFunction(input, cleanExpression);
+        }},
+    {"name": "anyline$ebnf$1", "symbols": []},
+    {"name": "anyline$ebnf$1", "symbols": ["anyline$ebnf$1", /[\S]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "anyline$ebnf$2", "symbols": []},
+    {"name": "anyline$ebnf$2$subexpression$1$ebnf$1", "symbols": [/[\S]/]},
+    {"name": "anyline$ebnf$2$subexpression$1$ebnf$1", "symbols": ["anyline$ebnf$2$subexpression$1$ebnf$1", /[\S]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "anyline$ebnf$2$subexpression$1", "symbols": ["__", "anyline$ebnf$2$subexpression$1$ebnf$1"]},
+    {"name": "anyline$ebnf$2", "symbols": ["anyline$ebnf$2", "anyline$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "anyline", "symbols": ["anyline$ebnf$1", "anyline$ebnf$2"], "postprocess":  (data) => {
+        	const [term1, otherterms] = data;
+        	const input = term1.join('') + otherterms.map((termexp) => {
+        		return termexp[0].input + termexp[1].join('');
+        	}).join('');
+        	return input;
         }},
     {"name": "_$ebnf$1", "symbols": []},
     {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", /[ \t]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
