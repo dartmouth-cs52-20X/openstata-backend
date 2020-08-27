@@ -3,6 +3,7 @@ import * as DoFiles from '../controllers/dofile_controller';
 import * as LogFiles from '../controllers/logfile_controller';
 import * as UserController from '../controllers/user_controller';
 import { requireAuth, requireSignin } from '../services/passport';
+import signS3 from '../services/s3';
 
 const router = Router();
 
@@ -30,8 +31,6 @@ router
 router.post('/signin', requireSignin, UserController.signin);
 router.post('/signup', UserController.signup);
 
-router.get('/runcode', (req, res) => {
-  res.send(`Returned code and a random number ${Math.random() * 100}`);
-});
+router.get('/sign-s3', signS3);
 
 export default router;
