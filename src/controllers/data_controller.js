@@ -4,10 +4,19 @@ export const getDataFile = async (fileName, user) => {
   return Data.findOne({ fileName, $or: [{ user }, { user: null }] });
 };
 
-export const insertData = async (data) => {
-  const newDataFile = new Data(data);
-  await newDataFile.save();
-  return newDataFile;
+export const insertData = async (data, user) => {
+  const { fileName, url } = data;
+  let dataFile = await Data.findOne({ fileName, user });
+  if (!dataFile) {
+    dataFile = new Data(data);
+  } else {
+    dataFile.url = url;
+  }
+  if (user) {
+    dataFile.user = user;
+  }
+  await dataFile.save();
+  return dataFile;
 };
 
 export const getDataFiles = async () => {

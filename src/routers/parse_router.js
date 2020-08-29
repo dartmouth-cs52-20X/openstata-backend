@@ -1,5 +1,4 @@
 import { Router } from 'express';
-// will add this later
 import { optionalAuth } from '../services/passport';
 import * as Parser from '../controllers/parsing_controller';
 import * as DataController from '../controllers/data_controller';
@@ -44,21 +43,6 @@ router.route('/')
       const pos = error.message.indexOf('Unexpected "');
       const message = error.message.slice(0, pos - 1);
       res.status(400).json({ output: [message] });
-    }
-  });
-
-// dummy route for us to add some sample datasets
-router.route('/add')
-  .post(optionalAuth, async (req, res) => {
-    try {
-      const userID = req.user ? req.user._id : null;
-      const data = req.body;
-      data.user = userID;
-      const response = await DataController.insertData(data);
-      res.json(response);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error });
     }
   });
 

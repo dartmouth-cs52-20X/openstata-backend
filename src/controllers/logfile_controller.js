@@ -51,6 +51,7 @@ export const deleteLogFile = (req, res) => {
     });
 };
 
+// saves all dofiles that are in a dictionary of filename: content
 export const saveLogFiles = async (logfiles, userID) => {
   if (!userID) return [null];
   try {
