@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 // create a PostSchema with a title field
 const LogFileSchema = new Schema({
-  fileName: String,
+  fileName: { type: String, index: true, required: true },
   content: String,
   author: { type: Schema.Types.ObjectId, ref: 'User' },
 }, {

@@ -5,6 +5,7 @@ const DoFileSchema = new Schema({
   fileName: String,
   content: String,
   author: { type: Schema.Types.ObjectId, ref: 'User' },
+  tutorialID: { type: String, default: null },
 }, {
   toObject: { virtuals: true },
   toJSON: { virtuals: true },

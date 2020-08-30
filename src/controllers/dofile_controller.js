@@ -80,3 +80,16 @@ export const deleteDoFile = (req, res) => {
       res.status(500).json({ error });
     });
 };
+
+const tutorials = [
+  { fileName: 'tutorial 1', content: '// tutorial 1', tutorialID: 'tutorial-1' },
+  { fileName: 'tutorial 2', content: '// tutorial 2', tutorialID: 'tutorial-2' },
+  { fileName: 'tutorial 3', content: '// tutorial 3', tutorialID: 'tutorial-3' },
+];
+
+export const addTutorials = async (userID) => {
+  return Promise.all(tutorials.map(async (tutorial) => {
+    const newTutorial = new DoFile({ ...tutorial, author: userID });
+    return newTutorial.save();
+  }));
+};

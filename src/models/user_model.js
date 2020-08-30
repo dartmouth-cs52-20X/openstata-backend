@@ -25,8 +25,6 @@ UserSchema.pre('save', function beforeyYourModelSave(next) {
   // the function runs in some other context so DO NOT bind it
   const user = this;
 
-  // TODO: do stuff here
-
   // only hash the password if it has been modified (or is new)
   if (!user.isModified('password')) return next();
   const salt = bcrypt.genSaltSync(10);
