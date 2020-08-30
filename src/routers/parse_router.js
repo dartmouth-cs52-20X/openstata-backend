@@ -46,6 +46,7 @@ router.route('/')
     }
   });
 
+// testing route to check parsing only
 router.route('/test')
   .post(async (req, res) => {
     try {
