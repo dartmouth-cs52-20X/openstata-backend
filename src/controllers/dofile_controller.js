@@ -73,6 +73,7 @@ const tutorials = [
   { fileName: 'tutorial 3', content: '// tutorial 3', tutorialID: 'tutorial-3' },
 ];
 
+// called upon new user registration to add these tutorials
 export const addTutorials = async (userID) => {
   return Promise.all(tutorials.map(async (tutorial) => {
     const newTutorial = new DoFile({ ...tutorial, author: userID });

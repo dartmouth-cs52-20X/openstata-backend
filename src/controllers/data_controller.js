@@ -1,9 +1,11 @@
 import Data from '../models/data_model';
 
+// gets a single datafile
 export const getDataFile = async (fileName, user) => {
   return Data.findOne({ fileName, $or: [{ user }, { user: null }] });
 };
 
+// adds datafile (will update ones with same filename)
 export const insertData = async (data, user) => {
   const { fileName, url } = data;
   let dataFile = await Data.findOne({ fileName, user });
@@ -19,15 +21,22 @@ export const insertData = async (data, user) => {
   return dataFile;
 };
 
+// get all datafiles for testing purposes
 export const getDataFiles = async () => {
   return Data.find().sort('-createdAt');
 };
 
+// gets all user datafiles + public ones (null userID)
 export const getUserData = async (userID) => {
-  return Data.find({ user: userID }).sort('-createdAt');
+  return Data.find({
+    $or: [
+      { user: userID },
+      { user: null },
+    ],
+  }).sort('-createdAt');
 };
 
-// replace all virtual filenames with their real URLs
+// replace all virtual filenames with their real URLs during parsing
 export const insertAllUrls = async (parsedOutput, userID) => {
   try {
     const response = await Promise.all(parsedOutput.map(async (object) => {

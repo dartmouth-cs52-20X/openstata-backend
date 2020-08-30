@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// microservice url to post AST parsed output to
 const FLASK_URL = 'https://open-stata-other-api.herokuapp.com/do';
 
 // eslint-disable-next-line import/prefer-default-export

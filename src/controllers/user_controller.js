@@ -45,6 +45,7 @@ export const signup = async (req, res, next) => {
 
     const newUser = new User({ email, password, username });
     const newUserToken = await newUser.save();
+    // when a new user signs up, we add in the default tutorials to their account
     await addTutorials(newUser._id);
 
     console.log('success creating user');
