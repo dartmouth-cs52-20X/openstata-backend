@@ -24,10 +24,10 @@ export const changePassword = (req, res, next) => {
         user.password = req.body.newPassword;
         user.save()
           .then(() => {
-            res.send('Sucessful change');
+            res.json({ result: 'Sucessful change' });
           });
       } else {
-        res.status(422).send('Must be an existing user');
+        res.status(422).json({ error: 'Must be an existing user' });
       }
     });
 };
