@@ -10,6 +10,27 @@ export const signin = (req, res, next) => {
   res.send({ token: tokenForUser(req.user), username: req.user.username });
 };
 
+export const changePassword = (req, res, next) => {
+  // const { username } = req.body; can do just change userProfile?
+
+  if (!req.body.newPassword) {
+    return res.status(422).send('You must provide a valid new password');
+  }
+
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user) {
+        user.password = req.body.newPassword;
+        user.save()
+          .then(() => {
+            res.send('Sucessful change');
+          });
+      } else {
+        res.status(422).send('You must provide the email of an existing user');
+      }
+    });
+};
+
 export const signup = (req, res, next) => {
   const { email } = req.body;
   const { password } = req.body;
