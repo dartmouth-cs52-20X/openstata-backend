@@ -19,10 +19,15 @@ router
   .get(requireAuth, DoFiles.getDoFiles);
 
 router
+  .route('/tutorials')
+  .get(requireAuth, DoFiles.getTutorials);
+
+router
   .route('/dofiles/:id')
   .get(requireAuth, DoFiles.getDoFile)
   .put(requireAuth, DoFiles.saveDoFile)
   .delete(requireAuth, DoFiles.deleteDoFile);
+
 router
   .route('/logfiles')
   .post(requireAuth, LogFiles.createLogFile)
@@ -35,6 +40,18 @@ router.post('/signup', UserController.signup);
 router.get('/sign-s3', signS3);
 
 router.route('/data')
+
+  .get(requireAuth, async (req, res) => {
+    try {
+      const userID = req.user._id;
+      const datafiles = await DataController.getUserData(userID);
+      res.json(datafiles);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: error.message });
+    }
+  })
+
   .post(requireAuth, async (req, res) => {
     try {
       const newData = req.body;

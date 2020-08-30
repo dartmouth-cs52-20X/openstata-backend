@@ -10,9 +10,9 @@ const router = Router();
 // handle parsing and execution
 router.route('/')
   .post(optionalAuth, async (req, res) => {
-    const { dofile } = req.body;
-    const userID = req.user ? req.user._id : null;
     try {
+      const { dofile, tutorialID } = req.body;
+      const userID = req.user ? req.user._id : null;
       const parsed = Parser.parseStata(dofile);
       const [parseErr, fixedParsed] = await DataController.insertAllUrls(parsed, userID);
       // URL replacement error
@@ -21,7 +21,7 @@ router.route('/')
         res.status(400).json({ output: [parseErr.message] });
         return;
       }
-      const [runErr, response] = await StataController.execute(fixedParsed);
+      const [runErr, response] = await StataController.execute(fixedParsed, tutorialID);
       // some runtime error
       if (runErr) {
         console.log(runErr);
@@ -49,7 +49,7 @@ router.route('/')
 router.route('/test')
   .post(async (req, res) => {
     try {
-      const { dofile } = req.body;
+      const { dofile, tutorialID } = req.body;
       const parsed = Parser.parseStata(dofile);
       const [err, fixedParsed] = await DataController.insertAllUrls(parsed);
       // URL replacement error
@@ -58,7 +58,7 @@ router.route('/test')
         res.status(400).json({ error: err.message });
         return;
       }
-      res.json({ dofile: fixedParsed });
+      res.json({ dofile: fixedParsed, tutorialID });
     } catch (error) {
       // parsing error
       console.log(error);

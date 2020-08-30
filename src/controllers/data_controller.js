@@ -23,6 +23,10 @@ export const getDataFiles = async () => {
   return Data.find().sort('-createdAt');
 };
 
+export const getUserData = async (userID) => {
+  return Data.find({ user: userID }).sort('-createdAt');
+};
+
 // replace all virtual filenames with their real URLs
 export const insertAllUrls = async (parsedOutput, userID) => {
   try {
