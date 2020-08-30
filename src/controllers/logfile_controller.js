@@ -20,10 +20,9 @@ export const createLogFile = (req, res) => {
 };
 
 export const getLogFile = (req, res) => {
-  // res.send('single post looked up');
-  LogFile.findOne({ fileName: req.body.fileName, author: req.user._id })
+  LogFile.findById(req.params.id)
     .then((result) => {
-      res.send(result);
+      res.json(result);
     }).catch((error) => {
       res.status(500).json({ error });
     });

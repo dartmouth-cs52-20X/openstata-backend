@@ -34,7 +34,7 @@ router
   .delete(requireAuth, LogFiles.deleteLogFile)
   .get(requireAuth, LogFiles.getLogFiles);
 router
-  .route('/logfile')
+  .route('/logfiles:id')
   .get(requireAuth, LogFiles.getLogFile);
 
 router.post('/signin', requireSignin, UserController.signin);
