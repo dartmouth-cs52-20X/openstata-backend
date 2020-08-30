@@ -27,7 +27,7 @@ export const changePassword = (req, res, next) => {
             res.send('Sucessful change');
           });
       } else {
-        res.status(422).send('You must provide the email of an existing user');
+        res.status(422).send('Must be an existing user');
       }
     });
 };
