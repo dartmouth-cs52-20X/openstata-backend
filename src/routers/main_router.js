@@ -44,9 +44,6 @@ router
   .route('/changepwd')
   .post(requireAuth, UserController.changePassword);
 
-router.get('/runcode', (req, res) => {
-  res.send(`Returned code and a random number ${Math.random() * 100}`);
-});
 router.get('/sign-s3', signS3);
 
 router.route('/data')
