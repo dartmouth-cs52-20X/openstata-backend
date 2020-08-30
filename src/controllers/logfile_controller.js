@@ -19,7 +19,7 @@ export const createLogFile = (req, res) => {
 };
 
 export const getLogFile = (req, res) => {
-  LogFile.findOne({ fileName: req.body.fileName, author: req.user._id })
+  LogFile.findById(req.params.id)
     .then((result) => {
       res.json(result);
     }).catch((error) => {
