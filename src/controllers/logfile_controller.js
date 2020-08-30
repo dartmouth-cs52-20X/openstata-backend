@@ -19,17 +19,15 @@ export const createLogFile = (req, res) => {
     });
 };
 
-/*
 export const getLogFile = (req, res) => {
   // res.send('single post looked up');
-  LogFile.findOne({ fileName: req.body.fileName })
+  LogFile.findOne({ fileName: req.body.fileName, author: req.user._id })
     .then((result) => {
       res.send(result);
     }).catch((error) => {
       res.status(500).json({ error });
     });
 };
-*/
 
 export const getLogFiles = (req, res) => {
   // res.send('single post looked up');

@@ -33,9 +33,16 @@ router
   .post(requireAuth, LogFiles.createLogFile)
   .delete(requireAuth, LogFiles.deleteLogFile)
   .get(requireAuth, LogFiles.getLogFiles);
+router
+  .route('/logfile')
+  .get(requireAuth, LogFiles.getLogFile);
 
 router.post('/signin', requireSignin, UserController.signin);
 router.post('/signup', UserController.signup);
+
+router
+  .route('/changepwd')
+  .post(requireAuth, UserController.changePassword);
 
 router.get('/sign-s3', signS3);
 
