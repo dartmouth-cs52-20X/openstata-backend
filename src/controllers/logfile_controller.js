@@ -1,7 +1,6 @@
 import LogFile from '../models/logfile_model';
 
 export const createLogFile = (req, res) => {
-  // res.send('post should be created and returned');
   LogFile.findOneAndDelete({ fileName: req.body.fileName, author: req.user._id }) // delete a file of the same name if it exists
     .then((result1) => {
       const logfile = new LogFile({
@@ -29,7 +28,6 @@ export const getLogFile = (req, res) => {
 };
 
 export const getLogFiles = (req, res) => {
-  // res.send('single post looked up');
   LogFile.find({ author: req.user._id })
     .then((result) => {
       res.json(result);
@@ -49,6 +47,7 @@ export const deleteLogFile = (req, res) => {
 };
 
 // saves all dofiles that are in a dictionary of filename: content
+// this happens after execution from flask
 export const saveLogFiles = async (logfiles, userID) => {
   if (!userID) return [null];
   try {
