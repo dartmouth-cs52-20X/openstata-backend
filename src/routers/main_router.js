@@ -2,7 +2,9 @@ import { Router } from 'express';
 import * as DoFiles from '../controllers/dofile_controller';
 import * as LogFiles from '../controllers/logfile_controller';
 import * as UserController from '../controllers/user_controller';
+import * as DataController from '../controllers/data_controller';
 import { requireAuth, requireSignin } from '../services/passport';
+import signS3 from '../services/s3';
 
 const router = Router();
 
@@ -17,10 +19,15 @@ router
   .get(requireAuth, DoFiles.getDoFiles);
 
 router
+  .route('/tutorials')
+  .get(requireAuth, DoFiles.getTutorials);
+
+router
   .route('/dofiles/:id')
   .get(requireAuth, DoFiles.getDoFile)
   .put(requireAuth, DoFiles.saveDoFile)
   .delete(requireAuth, DoFiles.deleteDoFile);
+
 router
   .route('/logfiles')
   .post(requireAuth, LogFiles.createLogFile)
@@ -40,5 +47,30 @@ router
 router.get('/runcode', (req, res) => {
   res.send(`Returned code and a random number ${Math.random() * 100}`);
 });
+router.get('/sign-s3', signS3);
+
+router.route('/data')
+
+  .get(requireAuth, async (req, res) => {
+    try {
+      const userID = req.user._id;
+      const datafiles = await DataController.getUserData(userID);
+      res.json(datafiles);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: error.message });
+    }
+  })
+
+  .post(requireAuth, async (req, res) => {
+    try {
+      const newData = req.body;
+      const response = await DataController.insertData(newData, req.user._id);
+      res.json(response);
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: error.message });
+    }
+  });
 
 export default router;

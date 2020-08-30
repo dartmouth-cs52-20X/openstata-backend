@@ -33,7 +33,7 @@ export const getLogFiles = (req, res) => {
   // res.send('single post looked up');
   LogFile.find({ author: req.user._id })
     .then((result) => {
-      res.send(result);
+      res.json(result);
     }).catch((error) => {
       res.status(500).json({ error });
     });
@@ -47,4 +47,22 @@ export const deleteLogFile = (req, res) => {
     .catch((error) => {
       res.status(500).json({ error });
     });
+};
+
+// saves all dofiles that are in a dictionary of filename: content
+export const saveLogFiles = async (logfiles, userID) => {
+  if (!userID) return [null];
+  try {
+    await Promise.all(Object.entries(logfiles).map(async ([fileName, content]) => {
+      let logFile = await LogFile.findOne({ fileName, author: userID });
+      if (!logFile) logFile = new LogFile({ fileName, content, author: userID });
+      else logFile.content = content;
+      await logFile.save();
+      return logFile;
+    }));
+
+    return [null];
+  } catch (error) {
+    return [error];
+  }
 };

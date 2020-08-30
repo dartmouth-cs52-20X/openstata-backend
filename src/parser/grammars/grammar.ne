@@ -5,13 +5,18 @@
 
 program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 	const [,,command, otherCommands] = data;
-	const output = [command.parsed];
-	output[0].input = command.input;
+	const output = [];
+	if (!command.comment) {
+		output.push(command.parsed);
+		output[0].input = command.input;
+	}
 	otherCommands.map((commandSet) => commandSet[2])
 		.forEach((nextCommand) => {
-			const newCommand = nextCommand.parsed;
-			newCommand.input = nextCommand.input;
-			output.push(newCommand);
+			if (!nextCommand.comment) {
+				const newCommand = nextCommand.parsed;
+				newCommand.input = nextCommand.input;
+				output.push(newCommand);
+			}
 		});
 	return output;
 }%}
@@ -22,6 +27,7 @@ program -> ___b _ command (newl _ command):* _ ___a {% (data) => {
 # the first grammar instruction is the 'main' top-level instruction
 # this implementation only does single line commands
 command ->
+	comment {% id %} |
 	clear {% (data) => {
 		return simpleCompose(data[0], composeClear());
 	} %} |
@@ -90,7 +96,8 @@ command ->
 		return simpleCompose(input, composeTest(parsed));
 	} %} |
 
-	"asdf" # more rules can just be tacked on with a pipe char
+
+	"afdsvacdsfabeadf" # more rules can just be tacked on with a pipe char
 
 
 ####### MACROS #######
@@ -108,6 +115,13 @@ optionArgs[name] -> $name "(" _ var  _ ")" {% (data) => {
 	const input = composeManyInputs(data);
 	const option = Array.isArray(opt[0]) ? opt[0][0] : opt[0];
 	return simpleCompose(input, { option, arg: argument.parsed });
+} %}
+
+
+####### COMMENT #######
+
+comment -> "//" anyline {% (data) => {
+	return { comment: true };
 } %}
 
 
@@ -526,6 +540,13 @@ exp -> [\S]:+ (__ [\S]:+):* {% (data, _, reject) => {
 	return composeUsingFunction(input, cleanExpression);
 }%}
 
+anyline -> [\S]:* (__ [\S]:+):* {% (data) => {
+	const [term1, otherterms] = data;
+	const input = term1.join('') + otherterms.map((termexp) => {
+		return termexp[0].input + termexp[1].join('');
+	}).join('');
+	return input;
+}%}
 
 ####### PRIMITIVES #######
 
