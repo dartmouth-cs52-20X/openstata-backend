@@ -8,7 +8,7 @@ dotenv.config({ silent: true });
 
 export const signin = (req, res, next) => {
   console.log('signing in');
-  res.json({ token: tokenForUser(req.user), username: req.user.username });
+  res.json({ token: tokenForUser(req.user), username: req.user.username, email: req.user.email });
 };
 
 export const changePassword = (req, res, next) => {
@@ -48,7 +48,7 @@ export const signup = async (req, res, next) => {
     await addTutorials(newUser._id);
 
     console.log('success creating user');
-    res.json({ token: tokenForUser(newUserToken) });
+    res.json({ token: tokenForUser(newUserToken), username: newUser.username, email: newUser.email });
   } catch (error) {
     console.log(error);
     res.status(406).json(error);
