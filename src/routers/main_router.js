@@ -19,6 +19,10 @@ router
   .get(requireAuth, DoFiles.getDoFiles);
 
 router
+  .route('/tutorials')
+  .get(requireAuth, DoFiles.getTutorials);
+
+router
   .route('/dofiles/:id')
   .get(requireAuth, DoFiles.getDoFile)
   .put(requireAuth, DoFiles.saveDoFile)
