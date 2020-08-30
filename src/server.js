@@ -6,20 +6,17 @@ import mongoose from 'mongoose';
 import mainRouter from './routers/main_router';
 import parseRouter from './routers/parse_router';
 
-// initialize
 const app = express();
 
-// additional init stuff should go before hitting the routing
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/platform_db';
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/open_stata';
 
-// copied from a private project I'm a part of
+// Connect the database
 const mongooseOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
   loggerLevel: 'error',
 };
-// Connect the database
 mongoose.connect(mongoURI, mongooseOptions).then(() => {
   mongoose.Promise = global.Promise; // configures mongoose to use ES6 Promises
   mongoose.set('useFindAndModify', false);
