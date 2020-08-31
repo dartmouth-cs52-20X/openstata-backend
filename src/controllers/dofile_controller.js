@@ -1,4 +1,5 @@
 import DoFile from '../models/dofile_model';
+import Tutorials from './tutorials';
 
 export const createDoFile = (req, res) => {
   const dofile = new DoFile({
@@ -67,15 +68,9 @@ export const deleteDoFile = (req, res) => {
     });
 };
 
-const tutorials = [
-  { fileName: 'tutorial 1', content: '// tutorial 1', tutorialID: 'tutorial-1' },
-  { fileName: 'tutorial 2', content: '// tutorial 2', tutorialID: 'tutorial-2' },
-  { fileName: 'tutorial 3', content: '// tutorial 3', tutorialID: 'tutorial-3' },
-];
-
 // called upon new user registration to add these tutorials
 export const addTutorials = async (userID) => {
-  return Promise.all(tutorials.map(async (tutorial) => {
+  return Promise.all(Tutorials.map(async (tutorial) => {
     const newTutorial = new DoFile({ ...tutorial, author: userID });
     return newTutorial.save();
   }));
