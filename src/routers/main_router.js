@@ -3,7 +3,7 @@ import * as DoFiles from '../controllers/dofile_controller';
 import * as LogFiles from '../controllers/logfile_controller';
 import * as UserController from '../controllers/user_controller';
 import * as DataController from '../controllers/data_controller';
-import { requireAuth, requireSignin } from '../services/passport';
+import { requireAuth, requireSignin, optionalAuth } from '../services/passport';
 import signS3 from '../services/s3';
 
 const router = Router();
@@ -59,10 +59,11 @@ router.route('/data')
     }
   })
 
-  .post(requireAuth, async (req, res) => {
+  .post(optionalAuth, async (req, res) => {
     try {
       const newData = req.body;
-      const response = await DataController.insertData(newData, req.user._id);
+      const userID = req.user ? req.user._id : null;
+      const response = await DataController.insertData(newData, userID);
       res.json(response);
     } catch (error) {
       console.log(error);
