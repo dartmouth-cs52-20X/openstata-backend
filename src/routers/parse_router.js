@@ -12,8 +12,14 @@ router.route('/')
   .post(optionalAuth, async (req, res) => {
     try {
       const { dofile, tutorialID } = req.body;
+      if (!dofile.trim()) {
+        console.log('missing input');
+        res.status(400).json({ output: ['missing input'] });
+        return;
+      }
+      const realDoFile = `${dofile}\n`;
       const userID = req.user ? req.user._id : null;
-      const parsed = Parser.parseStata(dofile);
+      const parsed = Parser.parseStata(realDoFile);
       const [parseErr, fixedParsed] = await DataController.insertAllUrls(parsed, userID);
       // URL replacement error
       if (parseErr) {
@@ -51,12 +57,18 @@ router.route('/test')
   .post(async (req, res) => {
     try {
       const { dofile, tutorialID } = req.body;
-      const parsed = Parser.parseStata(dofile);
+      if (!dofile.trim()) {
+        console.log('missing input');
+        res.status(400).json({ output: ['missing input'] });
+        return;
+      }
+      const realDoFile = `${dofile}\n`;
+      const parsed = Parser.parseStata(realDoFile);
       const [err, fixedParsed] = await DataController.insertAllUrls(parsed);
       // URL replacement error
       if (err) {
         console.log(err);
-        res.status(400).json({ error: err.message });
+        res.status(400).json({ output: [err.message] });
         return;
       }
       res.json({ dofile: fixedParsed, tutorialID });
@@ -66,7 +78,7 @@ router.route('/test')
       // gets rid of all the weird stuff
       const pos = error.message.indexOf('Unexpected "');
       const message = error.message.slice(0, pos - 1);
-      res.status(400).json({ error, message });
+      res.status(400).json({ output: [message] });
     }
   });
 
