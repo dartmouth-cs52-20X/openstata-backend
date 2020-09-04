@@ -7,14 +7,14 @@ combined with free tutorials and sample datasets to get anyone started with lear
 
 ## Architecture
 
-**Frontend** 
+[**Frontend**](https://github.com/dartmouth-cs52-20X/openstata)
 - UI Styling: CSS and Material-UI
 - Frontend structure: React
 - Frontend state management: Redux
 - API calls: Axios
 - Authentication: jwt
 
-**Backend**
+[**Backend**](https://github.com/dartmouth-cs52-20X/openstata-backend)
 - Platform: Node/Express
 - Parser generator: Nearley.js
 - Microservice HTTP calls: Axios
@@ -22,9 +22,9 @@ combined with free tutorials and sample datasets to get anyone started with lear
 - Persistent data file storage: S3
 - Authentication: Passport.js
 
-**Statistics Microservice**
+[**Statistics Microservice**](https://github.com/dartmouth-cs52-20X/openstata-engine)
 - Platform: Flask
-- Statistics: econtools, pandas
+- Statistics: econtools, pandas.
 
 ## Setup
 
