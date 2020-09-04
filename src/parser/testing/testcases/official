@@ -1,0 +1,89 @@
+// clear
+clear
+
+// use
+use "arjun.dta"
+use arjun.dta
+use arjun
+use folder/arjun
+use "url.csv"
+use "url.xlsx"
+use "url.dta"
+
+// summarize
+su
+su var1
+su var1 var2
+su var1 var2 if var3>10
+
+// describe
+d
+d var1
+d var1 var2
+
+// mean
+mean var1
+mean var1 var2
+mean var1 var2 if var3>10
+
+// log
+log using fname
+log using "fname.log"
+log using fname, replace
+log close	
+capture log close
+
+// generate
+gen var1 = 10
+gen var1 = var2 + var3
+gen var1 = var2 if var3>10
+
+// replace
+replace var1 = 10
+replace var1 = var2 + var3
+replace var1 = var2 if var3>10
+
+// rename
+rename oldname newname
+
+// drop
+drop v1
+drop v1 v2 v3
+drop if var1>var2
+
+// keep
+keep v1
+keep v1 v2 v3
+keep if var1>var2
+
+// tabulate
+tab var1
+tab var1 if var3>10
+tab var1 var2
+tab var1 var2 if var3>10
+tab va1, gen(newvarname)
+
+// merge
+merge 1:1 v1 using fname
+merge m:1 v1 using fname
+merge 1:m v1 using fname
+
+merge 1:1 v1 v2 v3 using fname
+merge m:1 v1 v2 v3 using fname
+merge 1:m v1 v2 v3 using fname
+
+// regression
+reg y x
+reg y x1 x2 x3
+reg y x1 x2 x3 if x4>10
+reg y x1 x2 x3 if x4>10, robust
+reg y x1 x3 x3 if x4>10, cluster(var1)
+
+// predict
+predict newvar
+predict newvar, xb
+predict newvar, resid
+
+// test
+test v1
+test v1 v2

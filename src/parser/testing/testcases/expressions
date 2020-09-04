@@ -1,0 +1,13 @@
+summ if a & b
+
+summ if a | b
+
+summ if !a
+
+summ if ~a
+
+summ if a != b
+
+summ if a ~= b
+
+summ if a^b == 10

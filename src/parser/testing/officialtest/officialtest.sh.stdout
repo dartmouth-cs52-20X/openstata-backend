@@ -1,0 +1,498 @@
+using grammar file ../index
+
+file testcases/official
+actual read input:
+// clear
+clear
+
+// use
+use "arjun.dta"
+use arjun.dta
+use arjun
+use folder/arjun
+use "url.csv"
+use "url.xlsx"
+use "url.dta"
+
+// summarize
+su
+su var1
+su var1 var2
+su var1 var2 if var3>10
+
+// describe
+d
+d var1
+d var1 var2
+
+// mean
+mean var1
+mean var1 var2
+mean var1 var2 if var3>10
+
+// log
+log using fname
+log using "fname.log"
+log using fname, replace
+log close	
+capture log close
+
+// generate
+gen var1 = 10
+gen var1 = var2 + var3
+gen var1 = var2 if var3>10
+
+// replace
+replace var1 = 10
+replace var1 = var2 + var3
+replace var1 = var2 if var3>10
+
+// rename
+rename oldname newname
+
+// drop
+drop v1
+drop v1 v2 v3
+drop if var1>var2
+
+// keep
+keep v1
+keep v1 v2 v3
+keep if var1>var2
+
+// tabulate
+tab var1
+tab var1 if var3>10
+tab var1 var2
+tab var1 var2 if var3>10
+tab va1, gen(newvarname)
+
+// merge
+merge 1:1 v1 using fname
+merge m:1 v1 using fname
+merge 1:m v1 using fname
+
+merge 1:1 v1 v2 v3 using fname
+merge m:1 v1 v2 v3 using fname
+merge 1:m v1 v2 v3 using fname
+
+// regression
+reg y x
+reg y x1 x2 x3
+reg y x1 x2 x3 if x4>10
+reg y x1 x2 x3 if x4>10, robust
+reg y x1 x3 x3 if x4>10, cluster(var1)
+
+// predict
+predict newvar
+predict newvar, xb
+predict newvar, resid
+
+// test
+test v1
+test v1 v2
+
+number of results: 1
+parsed AST with regenerated inputs
+[
+  {
+    command: 'clear',
+    args: null,
+    condition: null,
+    options: null,
+    input: 'clear'
+  },
+  {
+    command: 'use',
+    args: [ 'arjun.dta' ],
+    condition: null,
+    options: null,
+    input: 'use "arjun.dta"'
+  },
+  {
+    command: 'use',
+    args: [ 'arjun.dta' ],
+    condition: null,
+    options: null,
+    input: 'use arjun.dta'
+  },
+  {
+    command: 'use',
+    args: [ 'arjun' ],
+    condition: null,
+    options: null,
+    input: 'use arjun'
+  },
+  {
+    command: 'use',
+    args: [ 'folder/arjun' ],
+    condition: null,
+    options: null,
+    input: 'use folder/arjun'
+  },
+  {
+    command: 'use',
+    args: [ 'url.csv' ],
+    condition: null,
+    options: null,
+    input: 'use "url.csv"'
+  },
+  {
+    command: 'use',
+    args: [ 'url.xlsx' ],
+    condition: null,
+    options: null,
+    input: 'use "url.xlsx"'
+  },
+  {
+    command: 'use',
+    args: [ 'url.dta' ],
+    condition: null,
+    options: null,
+    input: 'use "url.dta"'
+  },
+  {
+    command: 'summarize',
+    args: [],
+    condition: null,
+    options: null,
+    input: 'su'
+  },
+  {
+    command: 'summarize',
+    args: [ 'var1' ],
+    condition: null,
+    options: null,
+    input: 'su var1'
+  },
+  {
+    command: 'summarize',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null,
+    input: 'su var1 var2'
+  },
+  {
+    command: 'summarize',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'su var1 var2 if var3>10'
+  },
+  {
+    command: 'describe',
+    args: [],
+    condition: null,
+    options: null,
+    input: 'd'
+  },
+  {
+    command: 'describe',
+    args: [ 'var1' ],
+    condition: null,
+    options: null,
+    input: 'd var1'
+  },
+  {
+    command: 'describe',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null,
+    input: 'd var1 var2'
+  },
+  {
+    command: 'mean',
+    args: [ 'var1' ],
+    condition: null,
+    options: null,
+    input: 'mean var1'
+  },
+  {
+    command: 'mean',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null,
+    input: 'mean var1 var2'
+  },
+  {
+    command: 'mean',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'mean var1 var2 if var3>10'
+  },
+  {
+    command: 'log',
+    args: [ 'using', 'fname' ],
+    condition: null,
+    options: null,
+    input: 'log using fname'
+  },
+  {
+    command: 'log',
+    args: [ 'using', 'fname.log' ],
+    condition: null,
+    options: null,
+    input: 'log using "fname.log"'
+  },
+  {
+    command: 'log',
+    args: [ 'using', 'fname' ],
+    condition: null,
+    options: [ { option: 'replace', arg: null } ],
+    input: 'log using fname, replace'
+  },
+  {
+    command: 'log',
+    args: [ 'close' ],
+    condition: null,
+    options: null,
+    input: 'log close'
+  },
+  {
+    command: 'capture log close',
+    args: null,
+    condition: null,
+    options: null,
+    input: 'capture log close'
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', '10' ],
+    condition: null,
+    options: null,
+    input: 'gen var1 = 10'
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', 'var2 + var3' ],
+    condition: null,
+    options: null,
+    input: 'gen var1 = var2 + var3'
+  },
+  {
+    command: 'generate',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'gen var1 = var2 if var3>10'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', '10' ],
+    condition: null,
+    options: null,
+    input: 'replace var1 = 10'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', 'var2 + var3' ],
+    condition: null,
+    options: null,
+    input: 'replace var1 = var2 + var3'
+  },
+  {
+    command: 'replace',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'replace var1 = var2 if var3>10'
+  },
+  {
+    command: 'rename',
+    args: [ 'oldname', 'newname' ],
+    condition: null,
+    options: null,
+    input: 'rename oldname newname'
+  },
+  {
+    command: 'drop',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'drop v1'
+  },
+  {
+    command: 'drop',
+    args: [ 'v1', 'v2', 'v3' ],
+    condition: null,
+    options: null,
+    input: 'drop v1 v2 v3'
+  },
+  {
+    command: 'drop',
+    args: null,
+    condition: 'var1>var2',
+    options: null,
+    input: 'drop if var1>var2'
+  },
+  {
+    command: 'keep',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'keep v1'
+  },
+  {
+    command: 'keep',
+    args: [ 'v1', 'v2', 'v3' ],
+    condition: null,
+    options: null,
+    input: 'keep v1 v2 v3'
+  },
+  {
+    command: 'keep',
+    args: null,
+    condition: 'var1>var2',
+    options: null,
+    input: 'keep if var1>var2'
+  },
+  {
+    command: 'tabulate',
+    args: [ 'var1' ],
+    condition: null,
+    options: null,
+    input: 'tab var1'
+  },
+  {
+    command: 'tabulate',
+    args: [ 'var1' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'tab var1 if var3>10'
+  },
+  {
+    command: 'tabulate',
+    args: [ 'var1', 'var2' ],
+    condition: null,
+    options: null,
+    input: 'tab var1 var2'
+  },
+  {
+    command: 'tabulate',
+    args: [ 'var1', 'var2' ],
+    condition: 'var3>10',
+    options: null,
+    input: 'tab var1 var2 if var3>10'
+  },
+  {
+    command: 'tabulate',
+    args: [ 'va1' ],
+    condition: null,
+    options: [ { option: 'gen', arg: 'newvarname' } ],
+    input: 'tab va1, gen(newvarname)'
+  },
+  {
+    command: 'merge',
+    args: [ '1:1', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:1 v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ 'm:1', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge m:1 v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:m', [ 'v1' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:m v1 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:1', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:1 v1 v2 v3 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ 'm:1', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge m:1 v1 v2 v3 using fname'
+  },
+  {
+    command: 'merge',
+    args: [ '1:m', [ 'v1', 'v2', 'v3' ], 'fname' ],
+    condition: null,
+    options: null,
+    input: 'merge 1:m v1 v2 v3 using fname'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x' ] ],
+    condition: null,
+    options: null,
+    input: 'reg y x'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: null,
+    options: null,
+    input: 'reg y x1 x2 x3'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: 'x4>10',
+    options: null,
+    input: 'reg y x1 x2 x3 if x4>10'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x2', 'x3' ] ],
+    condition: 'x4>10',
+    options: [ { option: 'robust', arg: null } ],
+    input: 'reg y x1 x2 x3 if x4>10, robust'
+  },
+  {
+    command: 'regress',
+    args: [ 'y', [ 'x1', 'x3', 'x3' ] ],
+    condition: 'x4>10',
+    options: [ { option: 'cluster', arg: 'var1' } ],
+    input: 'reg y x1 x3 x3 if x4>10, cluster(var1)'
+  },
+  {
+    command: 'predict',
+    args: 'newvar',
+    condition: null,
+    options: null,
+    input: 'predict newvar'
+  },
+  {
+    command: 'predict',
+    args: [ 'newvar' ],
+    condition: null,
+    options: [ { option: 'xb', arg: null } ],
+    input: 'predict newvar, xb'
+  },
+  {
+    command: 'predict',
+    args: [ 'newvar' ],
+    condition: null,
+    options: [ { option: 'resid', arg: null } ],
+    input: 'predict newvar, resid'
+  },
+  {
+    command: 'test',
+    args: [ 'v1' ],
+    condition: null,
+    options: null,
+    input: 'test v1'
+  },
+  {
+    command: 'test',
+    args: [ 'v1', 'v2' ],
+    condition: null,
+    options: null,
+    input: 'test v1 v2'
+  }
+]
+
